@@ -10,9 +10,15 @@ module.exports = (app) => {
     next();
   })
 
+  // Public routes
+  app.post('/sign-up', controller.addUser)
+  app.post('/login', controller.loginUser)
+
+  // Customer routes
+
+  // Admin routes
   app.get('/find-all-users', controller.findAllUsers)
   app.get('/find-by-user-id/', controller.findByUserId)
-  // app.post('/find-by-title-post', controller.findByTitlePOST)
-  app.post('/sign-up', controller.addUser)
   app.post('/delete-by-user-id', controller.deleteByUserId)
+  // app.post('/find-by-title-post', controller.findByTitlePOST) // galing pa sa example ng tutorial & baka magamit
 }
