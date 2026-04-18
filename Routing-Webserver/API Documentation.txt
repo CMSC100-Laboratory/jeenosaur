@@ -1,0 +1,37 @@
+
+
+GET /find-all
+  Parameters: None
+
+  Return: Array of all games in the collection
+
+GET /find-by-id
+  Parameters:
+    id: id of the game (corresponds to the _id field in Mongo DB)
+
+  Return: A single game document that matches the id provided. If no id is provided, returns a string saying so.
+
+POST /find-by-id-post
+  Parameters:
+    id: id of the game (corresponds to the _id field in Mongo DB)
+
+  Return: A single game document that matches the id provided. If no id is provided, returns a string saying so.
+
+POST /add
+  Parameters:
+    title:
+    developer:
+    year:
+    online:
+    maxLocalPlayers:
+
+  Return:
+    If successful, returns the saved record. Else, a string failure message.
+
+POST /delete-by-id
+  Parameters:
+    id: the _id of the game to be deleted
+
+  Returns:
+    If successful, returns a string success message. Else, a string failure message.
+
