@@ -29,6 +29,17 @@ const Product = mongoose.model('products', {
     price: { type: Number, required: true },
 });
 
+// Order Transaction Model
+const Order = mongoose.model('orders', {
+  transactionId: { type: String, required: true },
+  productId: { type: String, required: true }, // id reference to product
+  orderQuantity: { type: Number, required: true },
+  orderStatus: { type: Number, default: 0, required: true }, // 0 = Pending, 1 = Completed, 2 = Cancelled
+  email: { type: String, required: true }, // id reference to user
+  dateOrdered: { type: Date, default: Date.now, required: true },
+  time: { type: String, required: true }
+});
+
 
 
 // --------------- POST --------------
