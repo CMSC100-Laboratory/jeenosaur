@@ -20,6 +20,15 @@ const User = mongoose.model('users', {
     password: { type: String, required: true },
 });
 
+// Product Model
+const Product = mongoose.model('products', {
+    productName: { type: String, required: true },
+    productDescription: { type: String, required: true },
+    productType: { type: Number, required: true }, // 1 = Crop, 2 = Poultry
+    productQuantity: { type: Number, required: true },
+    price: { type: Number, required: true },
+});
+
 
 
 // --------------- POST --------------
@@ -106,7 +115,7 @@ exports.findAllUsers = async (req, res, next) => {
   if (!requester || !isAdmin(requester.userType)) { return res.send('Unauthorized'); }
 
   const users = await User.find();
-  res.send(users);
+  res.send({ total: users.length, users: users });
 }
 
 // Find user by ID
@@ -166,4 +175,87 @@ const addAdmin = async () => {
     await admin.save();
     console.log('Admin account created');
   }
+};
+
+// --------------- PRODUCTS --------------
+
+// Add a new product (Admin only)
+exports.addProduct = async (req, res, next) => {
+    const requester = await User.findById(req.headers['x-user-id']);
+    if (!requester || !isAdmin(requester.userType)) { return res.send({ success: false, message: 'Unauthorized' }); }
+
+    if (!req.body.productName || !req.body.productDescription || !req.body.productType || 
+        req.body.productQuantity == null || req.body.price == null) {
+        return res.send({ success: false, message: 'Missing required fields' });
+    }
+
+    if (![1, 2].includes(req.body.productType)) {
+        return res.send({ success: false, message: 'Invalid product type. Use 1 for Crop, 2 for Poultry' });
+    }
+
+    const newProduct = new Product({
+        productName: req.body.productName,
+        productDescription: req.body.productDescription,
+        productType: req.body.productType,
+        productQuantity: req.body.productQuantity,
+        price: req.body.price,
+    });
+
+    await newProduct.save();
+    res.send({ success: true, message: 'Product added successfully' });
+};
+
+// Get all products with optional sorting (Public/Customer)
+exports.getAllProducts = async (req, res, next) => {
+    const sortField = req.query.sortBy || 'productName'; // name, productType, price, productQuantity
+    const sortOrder = req.query.order === 'desc' ? -1 : 1; // asc by default
+
+    const products = await Product.find().sort({ [sortField]: sortOrder });
+    res.send(products);
+};
+
+// Get a single product by ID (Public/Customer)
+exports.getProductById = async (req, res, next) => {
+    if (!req.query.id) { return res.send({ success: false, message: 'No product ID provided' }); }
+
+    const product = await Product.findById(req.query.id);
+    if (!product) { return res.send({ success: false, message: 'Product not found' }); }
+
+    res.send(product);
+};
+
+// Update a product (Admin only)
+exports.updateProduct = async (req, res, next) => {
+    const requester = await User.findById(req.headers['x-user-id']);
+    if (!requester || !isAdmin(requester.userType)) { return res.send({ success: false, message: 'Unauthorized' }); }
+
+    if (!req.body.id) { return res.send({ success: false, message: 'No product ID provided' }); }
+
+    if (req.body.productType && ![1, 2].includes(req.body.productType)) {
+        return res.send({ success: false, message: 'Invalid product type. Use 1 for Crop, 2 for Poultry' });
+    }
+
+    const updated = await Product.findByIdAndUpdate(req.body.id, {
+        ...(req.body.productName && { productName: req.body.productName }),
+        ...(req.body.productDescription && { productDescription: req.body.productDescription }),
+        ...(req.body.productType && { productType: req.body.productType }),
+        ...(req.body.productQuantity != null && { productQuantity: req.body.productQuantity }),
+        ...(req.body.price != null && { price: req.body.price }),
+    }, { new: true });
+
+    if (!updated) { return res.send({ success: false, message: 'Product not found' }); }
+    res.send({ success: true, message: 'Product updated successfully', product: updated });
+};
+
+// Delete a product (Admin only)
+exports.deleteProduct = async (req, res, next) => {
+    const requester = await User.findById(req.headers['x-user-id']);
+    if (!requester || !isAdmin(requester.userType)) { return res.send({ success: false, message: 'Unauthorized' }); }
+
+    if (!req.body.id) { return res.send({ success: false, message: 'No product ID provided' }); }
+
+    const deleted = await Product.findByIdAndDelete(req.body.id);
+    if (!deleted) { return res.send({ success: false, message: 'Product not found' }); }
+
+    res.send({ success: true, message: 'Product deleted: ' + deleted.productName });
 };

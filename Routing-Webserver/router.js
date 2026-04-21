@@ -21,4 +21,11 @@ module.exports = (app) => {
   app.get('/find-by-user-id/', controller.findByUserId)
   app.post('/delete-by-user-id', controller.deleteByUserId)
   // app.post('/find-by-title-post', controller.findByTitlePOST) // galing pa sa example ng tutorial & baka magamit
+
+  // Product routes
+  app.post('/add-product', controller.addProduct)
+  app.get('/get-all-products', controller.getAllProducts)
+  app.get('/get-product-by-id', controller.getProductById)
+  app.post('/update-product', controller.updateProduct)
+  app.post('/delete-product', controller.deleteProduct)
 }
