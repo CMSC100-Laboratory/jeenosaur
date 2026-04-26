@@ -1,0 +1,50 @@
+Public Routes
+
+POST /sign-up
+  Parameters:
+    firstName (String, Required)
+    middleName (String, Optional)
+    lastName (String, Required)
+    email (String, Required)
+    password (String, Required)
+
+  Returns:
+    If successful, returns the saved record
+    Else, a string failure message (missing fields, invalid format, short password, or duplicate email)
+
+POST /login
+  Parameters:
+    email (String, Required)
+    password (String, Required)
+
+  Returns:
+    If successful, returns the user
+    Else, a string failure message (invalid input or missing fields)
+
+Admin Routes
+
+GET /find-all-users
+  Parameters:
+    userType (String, Required): must be Admin
+
+  Returns: 
+    An array of all users in the FARM-TO-TABLE database's users collection
+
+GET /find-by-user-id
+  Parameters:
+    userType (String, Required): must be Admin
+    id (String, Required): id of the user in Mongo DB
+
+  Returns: 
+    A single user document that matches the id provided
+    If no id is provided, returns a string saying so
+
+POST /delete-by-user-id
+  Parameters:
+    userType (String, Required): must be Admin
+    id (String, Required): the _id of the user to be deleted
+
+  Returns:
+    If successful, returns a string success message
+    Else, a string failure message
+
