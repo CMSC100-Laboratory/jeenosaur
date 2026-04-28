@@ -1,6 +1,7 @@
 const userController = require('../controllers/userController')
 const productController = require('../controllers/productController')
 const orderController = require('../controllers/orderController')
+const cartController = require('../controllers/cartController')
 
 module.exports = (app) => {
 
@@ -31,4 +32,14 @@ module.exports = (app) => {
   app.get('/get-all-orders', orderController.getAllOrders)
   app.post('/confirm-order', orderController.confirmOrder)
   app.get('/get-sales-report', orderController.getSalesReport)
+
+  // Order routes (Customer)
+  app.post('/create-order', orderController.createOrder)
+  app.post('/cancel-order', orderController.cancelOrder)
+  app.get('/get-my-orders', orderController.getMyOrders)
+
+  // Cart routes (Customer)
+  app.post('/add-to-cart', cartController.addToCart)
+  app.get('/get-cart', cartController.getCart)
+  app.post('/remove-from-cart', cartController.removeFromCart)
 }
