@@ -95,3 +95,74 @@ exports.getSalesReport = async (req, res, next) => {
 
   res.send({ period, startDate, report, totalSales });
 };
+
+// POST /create-order (Customer)
+exports.createOrder = async (req, req, next) => {
+  const requester = await User.findById(req.headers['x-user-id']);
+  if(!requester || requester.userType !== 'Customer'){
+    return res.send({ success: false, message: 'Unauthorized' });
+  }
+
+  if(!req.body.productId || !req.body.orderQuantity){
+    return res.send({ success: false, message: 'Missing product ID or quantity' });
+  }
+
+  //generate random transaction id
+  const transactionId = 'TRX-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+
+  const now = new Date();
+  const timeString = now.toLocaleTimeString(); //format to readable time string
+
+  const newOrder = new Order({
+    transactionId: transactionId,
+    productId: req.body.productId,
+    orderQuantity: req.body.orderQuantity,
+    orderStatus: 0, //pending
+    email: requester.email,
+    dateOrdered: now,
+    time: timeString
+  });
+
+  await newOrder.save();
+  res.send({ success: true, message: 'Order created successfully', transactionId });
+};
+
+// POST /cancel-order (Customer)
+exports.cancelOrder = async (req, res, next) => {
+  const requester = await User.findById(req.headers['x-user-id']);
+  if (!requester || requester.userType !== 'Customer') { 
+    return res.send({ success: false, message: 'Unauthorized' }); 
+  }
+
+  if (!req.body.transactionId) { 
+    return res.send({ success: false, message: 'No transaction ID provided' }); 
+  }
+
+  //find the order and verify it belongs to the logged-in customer
+  const order = await Order.findOne({ 
+    transactionId: req.body.transactionId, 
+    email: requester.email 
+  });
+  
+  if (!order) { return res.send({ success: false, message: 'Order not found' }); }
+
+  if (order.orderStatus !== 0) { 
+    return res.send({ success: false, message: 'Only pending orders can be canceled' }); 
+  }
+
+  order.orderStatus = 2; // 2 = Canceled
+  await order.save();
+  
+  res.send({ success: true, message: 'Order canceled successfully' });
+};
+
+// GET /get-my-orders (Customer)
+exports.getMyOrders = async (req, res, next) => {
+  const requester = await User.findById(req.headers['x-user-id']);
+  if (!requester || requester.userType !== 'Customer') { 
+    return res.send({ success: false, message: 'Unauthorized' }); 
+  }
+
+  const orders = await Order.find({ email: requester.email }).sort({ dateOrdered: -1 });
+  res.send({ total: orders.length, orders });
+};
