@@ -42,4 +42,7 @@ module.exports = (app) => {
   app.post('/add-to-cart', cartController.addToCart)
   app.get('/get-cart', cartController.getCart)
   app.post('/remove-from-cart', cartController.removeFromCart)
+
+  //Update cart item quantity
+  app.post('/update-cart-item', cartController.updateCartItem);
 }

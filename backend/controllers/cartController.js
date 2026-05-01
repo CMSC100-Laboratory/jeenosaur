@@ -79,3 +79,33 @@ exports.removeFromCart = async (req, res, next) => {
 
   res.send({ success: true, message: 'Item removed from cart' });
 };
+
+// POST /update-cart-item (Customer) - Update quantity of existing cart item
+exports.updateCartItem = async (req, res, next) => {
+  const requester = await User.findById(req.headers['x-user-id']);
+  if (!requester || requester.userType !== 'Customer') { 
+    return res.send({ success: false, message: 'Unauthorized' }); 
+  }
+
+  if (!req.body.cartItemId || req.body.quantity == null) {
+    return res.send({ success: false, message: 'Missing cart item ID or quantity' });
+  }
+
+  // Validate quantity is positive
+  if (req.body.quantity < 1) {
+    // If quantity is 0 or less, remove the item instead
+    await Cart.findOneAndDelete({ _id: req.body.cartItemId, email: requester.email });
+    return res.send({ success: true, message: 'Item removed from cart' });
+  }
+
+  // Update the quantity
+  const updated = await Cart.findOneAndUpdate(
+    { _id: req.body.cartItemId, email: requester.email },
+    { quantity: req.body.quantity },
+    { new: true }
+  );
+  
+  if (!updated) { return res.send({ success: false, message: 'Cart item not found' }); }
+
+  res.send({ success: true, message: 'Cart updated successfully', cartItem: updated });
+};

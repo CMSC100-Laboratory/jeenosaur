@@ -97,7 +97,8 @@ exports.getSalesReport = async (req, res, next) => {
 };
 
 // POST /create-order (Customer)
-exports.createOrder = async (req, req, next) => {
+// FIXED: Changed second 'req' to 'res'
+exports.createOrder = async (req, res, next) => {
   const requester = await User.findById(req.headers['x-user-id']);
   if(!requester || requester.userType !== 'Customer'){
     return res.send({ success: false, message: 'Unauthorized' });
