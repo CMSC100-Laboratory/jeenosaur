@@ -75,12 +75,14 @@ exports.getSalesReport = async (req, res, next) => {
   for (const order of completedOrders) {
     const product = await Product.findById(order.productId);
     const productName = product ? product.productName : 'Unknown Product';
+    const productType = product ? product.productType : null;
     const income = (product ? product.price : 0) * order.orderQuantity;
 
     if (!reportMap[order.productId]) {
       reportMap[order.productId] = {
         productId: order.productId,
         productName,
+        productType,
         totalQuantitySold: 0,
         totalIncome: 0,
       };
