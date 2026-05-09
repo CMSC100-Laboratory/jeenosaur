@@ -58,24 +58,32 @@ exports.loginUser = async (req, res, next) => {
 // GET /find-all-users (Admin)
 exports.findAllUsers = async (req, res, next) => {
   const userId = req.headers['x-user-id'];
-  if (!req.headers['x-user-id']) { return res.send('Unauthorized'); }
-  if (!userId) { 
-      return res.send({ success: false, message: 'Unauthorized: Missing credentials' }); 
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
   }
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || !isAdmin(requester.userType)) { return res.send('Unauthorized'); }
 
+  const requester = await User.findById(userId);
+  if (!requester || !isAdmin(requester.userType)) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
+  }
+  
   const users = await User.find();
   return res.send({ total: users.length, users: users });
 };
 
 // GET /find-by-user-id (Admin)
 exports.findByUserId = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!req.headers['x-user-id']) { return res.send('Unauthorized'); }
-  if (!requester || !isAdmin(requester.userType)) { return res.send('Unauthorized'); }
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
 
-  if (!req.query.id) { return res.send('No id provided'); }
+  const requester = await User.findById(userId);
+  if (!requester || !isAdmin(requester.userType)) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
+  }
+
+  if (!req.query.id) { return res.send({ success: false, message: 'No id provided' }); }
 
   const user = await User.findOne({ _id: req.query.id });
   res.send(user);
@@ -83,13 +91,16 @@ exports.findByUserId = async (req, res, next) => {
 
 // POST /delete-by-user-id (Admin)
 exports.deleteByUserId = async (req, res, next) => {
-  if (!req.headers['x-user-id']) { return res.send('Unauthorized'); }
   const userId = req.headers['x-user-id'];
-  if (!userId) return res.send('Unauthorized');
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
 
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || !isAdmin(requester.userType)) { return res.send('Unauthorized'); }
-
+  const requester = await User.findById(userId);
+  if (!requester || !isAdmin(requester.userType)) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
+  }
+  
   const user = await User.findOneAndDelete({ _id: req.body.id });
   if (!user) { return res.send('Unable to delete user'); }
   if (isAdmin(user.userType)) {

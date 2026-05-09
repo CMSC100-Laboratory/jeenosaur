@@ -27,11 +27,13 @@ export default function App() {
 
   // Load cart count from backend
   const loadCartCount = async () => {
+    if (!user?.id) return;
+
     try {
       const res = await fetch('http://localhost:3001/get-cart', {
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': user?.id
+          'x-user-id': user.id
         }
       });
       const data = await res.json();

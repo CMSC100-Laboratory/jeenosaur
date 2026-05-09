@@ -5,8 +5,15 @@ const isAdmin = (type) => type === 'Admin';
 
 // POST /add-product (Admin)
 exports.addProduct = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || !isAdmin(requester.userType)) { return res.send({ success: false, message: 'Unauthorized' }); }
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester || !isAdmin(requester.userType)) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
+  }
 
   if (!req.body.productName || !req.body.productDescription || !req.body.productType ||
     req.body.productQuantity == null || req.body.price == null) {
@@ -50,9 +57,16 @@ exports.getProductById = async (req, res, next) => {
 
 // POST /update-product (Admin)
 exports.updateProduct = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || !isAdmin(requester.userType)) { return res.send({ success: false, message: 'Unauthorized' }); }
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
 
+  const requester = await User.findById(userId);
+  if (!requester || !isAdmin(requester.userType)) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
+  }
+  
   if (!req.body.id) { return res.send({ success: false, message: 'No product ID provided' }); }
 
   if (req.body.productType && ![1, 2].includes(req.body.productType)) {
@@ -73,8 +87,15 @@ exports.updateProduct = async (req, res, next) => {
 
 // POST /delete-product (Admin)
 exports.deleteProduct = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || !isAdmin(requester.userType)) { return res.send({ success: false, message: 'Unauthorized' }); }
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester || !isAdmin(requester.userType)) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
+  }
 
   if (!req.body.id) { return res.send({ success: false, message: 'No product ID provided' }); }
 

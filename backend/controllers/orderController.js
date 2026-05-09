@@ -7,9 +7,16 @@ const isAdmin = (type) => type === 'Admin';
 // GET /get-all-orders (Admin)
 // Returns all orders, optionally filtered by status (?status=0|1|2)
 exports.getAllOrders = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || !isAdmin(requester.userType)) { return res.send({ success: false, message: 'Unauthorized' }); }
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
 
+  const requester = await User.findById(userId);
+  if (!requester || !isAdmin(requester.userType)) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
+  }
+  
   const filter = {};
   if (req.query.status != null) { filter.orderStatus = req.query.status; }
 
@@ -20,8 +27,15 @@ exports.getAllOrders = async (req, res, next) => {
 // POST /confirm-order (Admin)
 // Sets order status to 1 (Completed) and decrements product quantity
 exports.confirmOrder = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || !isAdmin(requester.userType)) { return res.send({ success: false, message: 'Unauthorized' }); }
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester || !isAdmin(requester.userType)) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
+  }
 
   if (!req.body.transactionId) { return res.send({ success: false, message: 'No transaction ID provided' }); }
 
@@ -46,8 +60,15 @@ exports.confirmOrder = async (req, res, next) => {
 // GET /get-sales-report (Admin)
 // Query params: period = 'weekly' | 'monthly' | 'annual'
 exports.getSalesReport = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || !isAdmin(requester.userType)) { return res.send({ success: false, message: 'Unauthorized' }); }
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester || !isAdmin(requester.userType)) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
+  }
 
   const period = req.query.period || 'annual';
   const now = new Date();
@@ -101,9 +122,14 @@ exports.getSalesReport = async (req, res, next) => {
 // POST /create-order (Customer)
 // FIXED: Changed second 'req' to 'res'
 exports.createOrder = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if(!requester || requester.userType !== 'Customer'){
-    return res.send({ success: false, message: 'Unauthorized' });
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester || requester.userType !== 'Customer') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
   }
 
   if(!req.body.productId || !req.body.orderQuantity){
@@ -132,9 +158,14 @@ exports.createOrder = async (req, res, next) => {
 
 // POST /cancel-order (Customer)
 exports.cancelOrder = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || requester.userType !== 'Customer') { 
-    return res.send({ success: false, message: 'Unauthorized' }); 
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester || requester.userType !== 'Customer') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
   }
 
   if (!req.body.transactionId) { 
@@ -161,9 +192,14 @@ exports.cancelOrder = async (req, res, next) => {
 
 // GET /get-my-orders (Customer)
 exports.getMyOrders = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || requester.userType !== 'Customer') { 
-    return res.send({ success: false, message: 'Unauthorized' }); 
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester || requester.userType !== 'Customer') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
   }
 
   const orders = await Order.find({ email: requester.email }).sort({ dateOrdered: -1 });

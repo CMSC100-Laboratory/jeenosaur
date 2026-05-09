@@ -4,9 +4,14 @@ const Cart = require('../models/Cart')
 
 // POST /add-to-cart (Customer)
 exports.addToCart = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || requester.userType !== 'Customer') { 
-    return res.send({ success: false, message: 'Unauthorized' }); 
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
   }
 
   if (!req.body.productId || !req.body.quantity) {
@@ -35,9 +40,14 @@ exports.addToCart = async (req, res, next) => {
 
 // GET /get-cart (Customer)
 exports.getCart = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || requester.userType !== 'Customer') { 
-    return res.send({ success: false, message: 'Unauthorized' }); 
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
   }
 
   const cartItems = await Cart.find({ email: requester.email });
@@ -64,9 +74,14 @@ exports.getCart = async (req, res, next) => {
 
 // POST /remove-from-cart (Customer)
 exports.removeFromCart = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || requester.userType !== 'Customer') { 
-    return res.send({ success: false, message: 'Unauthorized' }); 
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
   }
 
   if (!req.body.cartItemId) {
@@ -82,9 +97,14 @@ exports.removeFromCart = async (req, res, next) => {
 
 // POST /update-cart-item (Customer) - Update quantity of existing cart item
 exports.updateCartItem = async (req, res, next) => {
-  const requester = await User.findById(req.headers['x-user-id']);
-  if (!requester || requester.userType !== 'Customer') { 
-    return res.send({ success: false, message: 'Unauthorized' }); 
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
   }
 
   if (!req.body.cartItemId || req.body.quantity == null) {
