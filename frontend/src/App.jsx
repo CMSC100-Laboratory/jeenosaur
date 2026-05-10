@@ -122,32 +122,21 @@ export default function App() {
   );
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', width: '100%', minHeight: '100vh', padding: user ? '20px' : '0'}}>
-      {/* Global Header */}
-      {user && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #eee' }}>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 20 }}>🌾 Farm-to-Table</h1>
-            <p style={{ margin: '4px 0 0', fontSize: 13, color: '#666' }}>
-              {user.userType === 'Admin' ? 'Department of Agriculture' : `Hi, ${user.email.split('@')[0]}!`}
-            </p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            {user.userType === 'Admin' ? <AdminNav /> : <CustomerNav />}
-          </div>
-        </div>
-      )}
-
+    <div style={{ fontFamily: 'system-ui, sans-serif', width: '100%', minHeight: '100vh', padding: user ? '20px' : '0' }}>
+      
       {/* Page Router */}
       {page === 'login' && <Login onLogin={handleLogin} onGoToSignUp={() => setPage('signup')} />}
       {page === 'signup' && <SignUp onGoToLogin={() => setPage('login')} />}
       
-      {/* Customer Pages with Cart Persistence */}
+      {/* Customer Pages */}
       {page === 'products' && user?.userType === 'Customer' && (
         <ProductList 
           user={user} 
           onLogout={handleLogout} 
-          onCartUpdate={loadCartCount} // Refresh cart badge after add
+          onCartUpdate={loadCartCount}
+          onGoToProducts={() => setPage('products')}
+          onGoToCart={() => setPage('cart')}
+          onGoToOrders={() => setPage('orders')}
         />
       )}
       {page === 'cart' && user?.userType === 'Customer' && (
@@ -156,6 +145,9 @@ export default function App() {
           onLogout={handleLogout} 
           onCheckout={() => setPage('orders')}
           onCartUpdate={loadCartCount}
+          onGoToProducts={() => setPage('products')}
+          onGoToCart={() => setPage('cart')}
+          onGoToOrders={() => setPage('orders')}
         />
       )}
       {page === 'orders' && user?.userType === 'Customer' && (
@@ -163,6 +155,9 @@ export default function App() {
           user={user} 
           onLogout={handleLogout} 
           onBackToProducts={() => setPage('products')}
+          onGoToProducts={() => setPage('products')}
+          onGoToCart={() => setPage('cart')}
+          onGoToOrders={() => setPage('orders')}
         />
       )}
       
