@@ -122,7 +122,7 @@ export default function App() {
   );
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 1200, margin: '0 auto', padding: 20 }}>
+    <div style={{ fontFamily: 'system-ui, sans-serif', width: '100%', minHeight: '100vh', padding: user ? '20px' : '0'}}>
       {/* Global Header */}
       {user && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #eee' }}>
