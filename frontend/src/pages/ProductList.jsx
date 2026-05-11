@@ -5,7 +5,8 @@ import noonImage from '../assets/noon.png';
 import sunsetImage from '../assets/sunset.png';
 import nightImage from '../assets/night.png';
 
-export default function ProductList({ user, onLogout, onCartUpdate, onGoToProducts, onGoToCart, onGoToOrders }) {
+// ✅ Accept activeTab prop
+export default function ProductList({ user, onLogout, onCartUpdate, onGoToProducts, onGoToCart, onGoToOrders, activeTab = 'products' }) {
   const [products, setProducts] = useState([]);
   const [sortBy, setSortBy] = useState('productName');
   const [order, setOrder] = useState('asc');
@@ -14,7 +15,6 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
   const [timeOfDay, setTimeOfDay] = useState('morning');
   const [cartCount, setCartCount] = useState(0);
 
-  // ✅ Exact time logic matching Login/Signup
   useEffect(() => {
     const updateTime = () => {
       const hour = new Date().getHours();
@@ -73,87 +73,46 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
     p.productDescription.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Themes
   const themes = {
     morning: {
       bg: `url(${dayImage})`,
       overlay: 'linear-gradient(135deg, rgba(27, 94, 32, 0.55) 0%, rgba(46, 125, 50, 0.4) 100%)',
-      accent: '#81C784',
-      panelBg: '#F1F8E9',
-      titleColor: '#1B5E20',
-      textPrimary: '#2E7D32',
-      textSecondary: '#666666',
-      inputBg: '#FFFFFF',
-      inputBorder: '#E0E0E0',
-      inputFocus: '#4CAF50',
-      btnBg: '#2E7D32',
-      btnHover: '#1B5E20',
-      btnShadow: 'rgba(46, 125, 50, 0.3)',
-      linkColor: '#2E7D32',
-      logoutColor: '#1b5e20',
-      navBtnBorder: 'rgba(255,255,255,0.3)',
-      navBtnBg: 'rgba(255,255,255,0.15)',
-      navBtnActive: 'rgba(255,255,255,0.35)'
+      accent: '#81C784', panelBg: '#F1F8E9', titleColor: '#1B5E20',
+      textPrimary: '#2E7D32', textSecondary: '#666666',
+      inputBg: '#FFFFFF', inputBorder: '#E0E0E0', inputFocus: '#4CAF50',
+      btnBg: '#2E7D32', btnHover: '#1B5E20', btnShadow: 'rgba(46, 125, 50, 0.3)',
+      linkColor: '#2E7D32', logoutColor: '#1b5e20',
+      navBtnBorder: 'rgba(255,255,255,0.3)', navBtnBg: 'rgba(255,255,255,0.15)', navBtnActive: 'rgba(255,255,255,0.35)'
     },
     noon: {
       bg: `url(${noonImage})`,
       overlay: 'linear-gradient(135deg, rgba(27, 94, 32, 0.5) 0%, rgba(76, 175, 80, 0.35) 100%)',
-      accent: '#66BB6A',
-      panelBg: '#E8F5E9',
-      titleColor: '#1B5E20',
-      textPrimary: '#2E7D32',
-      textSecondary: '#666666',
-      inputBg: '#FFFFFF',
-      inputBorder: '#E0E0E0',
-      inputFocus: '#43A047',
-      btnBg: '#2E7D32',
-      btnHover: '#1B5E20',
-      btnShadow: 'rgba(46, 125, 50, 0.3)',
-      linkColor: '#2E7D32',
-      logoutColor: '#2e7d32',
-      navBtnBorder: 'rgba(255,255,255,0.3)',
-      navBtnBg: 'rgba(255,255,255,0.15)',
-      navBtnActive: 'rgba(255,255,255,0.35)'
+      accent: '#66BB6A', panelBg: '#E8F5E9', titleColor: '#1B5E20',
+      textPrimary: '#2E7D32', textSecondary: '#666666',
+      inputBg: '#FFFFFF', inputBorder: '#E0E0E0', inputFocus: '#43A047',
+      btnBg: '#2E7D32', btnHover: '#1B5E20', btnShadow: 'rgba(46, 125, 50, 0.3)',
+      linkColor: '#2E7D32', logoutColor: '#2e7d32',
+      navBtnBorder: 'rgba(255,255,255,0.3)', navBtnBg: 'rgba(255,255,255,0.15)', navBtnActive: 'rgba(255,255,255,0.35)'
     },
     sunset: {
       bg: `url(${sunsetImage})`,
       overlay: 'linear-gradient(135deg, rgba(27, 94, 32, 0.65) 0%, rgba(85, 139, 47, 0.5) 50%, rgba(178, 223, 138, 0.25) 100%)',
-      accent: '#AED581',
-      panelBg: '#F1F8E9',
-      titleColor: '#1B5E20',
-      textPrimary: '#2E7D32',
-      textSecondary: '#666666',
-      inputBg: '#FFFFFF',
-      inputBorder: '#E0E0E0',
-      inputFocus: '#4CAF50',
-      btnBg: '#2E7D32',
-      btnHover: '#1B5E20',
-      btnShadow: 'rgba(46, 125, 50, 0.3)',
-      linkColor: '#2E7D32',
-      logoutColor: '#1b5e20',
-      navBtnBorder: 'rgba(255,255,255,0.3)',
-      navBtnBg: 'rgba(255,255,255,0.15)',
-      navBtnActive: 'rgba(255,255,255,0.35)'
+      accent: '#AED581', panelBg: '#F1F8E9', titleColor: '#1B5E20',
+      textPrimary: '#2E7D32', textSecondary: '#666666',
+      inputBg: '#FFFFFF', inputBorder: '#E0E0E0', inputFocus: '#4CAF50',
+      btnBg: '#2E7D32', btnHover: '#1B5E20', btnShadow: 'rgba(46, 125, 50, 0.3)',
+      linkColor: '#2E7D32', logoutColor: '#1b5e20',
+      navBtnBorder: 'rgba(255,255,255,0.3)', navBtnBg: 'rgba(255,255,255,0.15)', navBtnActive: 'rgba(255,255,255,0.35)'
     },
     night: {
       bg: `url(${nightImage})`,
-      overlay: 'linear-gradient(135deg, rgba(13, 71, 161, 0.6) 0%, rgba(46, 125, 50, 0.5) 50%)',
-      accent: '#64B5F6',
-      panelBg: '#E3F2FD',
-      titleColor: '#1B5E20',
-      textPrimary: '#2E7D32',
-      textSecondary: '#666666',
-      inputBg: '#FFFFFF',
-      inputBorder: '#E0E0E0',
-      inputFocus: '#4CAF50',
-      btnBg: '#2E7D32',
-      btnHover: '#1B5E20',
-      btnShadow: 'rgba(46, 125, 50, 0.3)',
-      linkColor: '#2E7D32',
-      logoutColor: '#1B5E20',
-      navBtnBorder: 'rgba(255,255,255,0.3)',
-      navBtnBg: 'rgba(255,255,255,0.15)',
-      navBtnActive: 'rgba(255,255,255,0.35)'
+      overlay: 'linear-gradient(135deg, rgba(13, 71, 161, 0.6) 0%, rgba(46, 125, 50, 0.5) 100%)',
+      accent: '#64B5F6', panelBg: '#E3F2FD', titleColor: '#1B5E20',
+      textPrimary: '#2E7D32', textSecondary: '#666666',
+      inputBg: '#FFFFFF', inputBorder: '#E0E0E0', inputFocus: '#4CAF50',
+      btnBg: '#2E7D32', btnHover: '#1B5E20', btnShadow: 'rgba(46, 125, 50, 0.3)',
+      linkColor: '#2E7D32', logoutColor: '#1565C0',
+      navBtnBorder: 'rgba(255,255,255,0.3)', navBtnBg: 'rgba(255,255,255,0.15)', navBtnActive: 'rgba(255,255,255,0.35)'
     }
   };
 
@@ -166,6 +125,7 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
       minHeight: '100vh',
       paddingBottom: 40
     }}>
+
       {/* NAVIGATION BAR */}
       <div style={{ 
         position: 'relative',
@@ -204,7 +164,7 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
                 borderRadius: 16, padding: '12px 20px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
                 border: '2px solid rgba(255,255,255,0.5)', transition: 'all 0.3s'
               }}>
-                <span style={{ marginRight: 12, fontSize: 20 }}>🔍</span>
+                <span style={{ marginRight: 12, fontSize: 20 }}></span>
                 <input
                   type="text"
                   placeholder="Search for fresh produce..."
@@ -215,36 +175,42 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
               </div>
             </div>
 
-            {/* Navigation Buttons */}
+            {/* Navigation Buttons with Glow Effect */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {['Products', 'Cart', 'Orders'].map((item, idx) => {
-                const icon = item === 'Products' ? '🛍️' : item === 'Cart' ? '🛒' : '📦';
-                const isActive = (item === 'Products' && window.location.hash !== '#cart' && window.location.hash !== '#orders') ||
-                                 (item === 'Cart' && window.location.hash === '#cart') ||
-                                 (item === 'Orders' && window.location.hash === '#orders');
+              {['Products', 'Cart', 'Orders'].map((item) => {
+                const isCurrent = activeTab === item.toLowerCase();
                 return (
                   <button 
                     key={item}
                     onClick={item === 'Products' ? onGoToProducts : item === 'Cart' ? onGoToCart : onGoToOrders}
                     style={{ 
-                      padding: '10px 18px', 
-                      background: isActive ? theme.navBtnActive : theme.navBtnBg,
+                      padding: '10px 20px', 
+                      background: isCurrent ? 'rgba(255,255,255,0.2)' : theme.navBtnBg,
                       color: '#FFFFFF',
-                      border: `2px solid ${theme.navBtnBorder}`,
+                      border: `2px solid ${isCurrent ? theme.accent : theme.navBtnBorder}`,
                       borderRadius: 12,
                       cursor: 'pointer',
                       fontWeight: 700,
-                      fontSize: 13,
+                      fontSize: 14,
                       backdropFilter: 'blur(8px)',
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      display: 'flex', alignItems: 'center', gap: 8,
                       position: 'relative',
-                      textShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                      textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                      boxShadow: isCurrent ? `0 0 15px ${theme.accent}, 0 0 30px ${theme.accent}40` : '0 4px 12px rgba(0,0,0,0.1)'
                     }}
-                    onMouseOver={e => e.target.style.background = theme.navBtnActive}
-                    onMouseOut={e => e.target.style.background = isActive ? theme.navBtnActive : theme.navBtnBg}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = isCurrent 
+                        ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}50` 
+                        : '0 6px 20px rgba(0,0,0,0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = isCurrent 
+                        ? `0 0 15px ${theme.accent}, 0 0 30px ${theme.accent}40` 
+                        : '0 4px 12px rgba(0,0,0,0.1)';
+                    }}
                   >
-                    <span style={{ fontSize: 16 }}>{icon}</span>
                     <span>{item}</span>
                     {item === 'Cart' && cartCount > 0 && (
                       <span style={{
@@ -272,6 +238,7 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
                   fontSize: 13, boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', letterSpacing: '0.5px'
                 }}
+
                 onMouseOver={e => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = `0 6px 20px ${theme.logoutColor}40`; }}
                 onMouseOut={e => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)'; }}
               >

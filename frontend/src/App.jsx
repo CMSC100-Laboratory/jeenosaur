@@ -128,6 +128,16 @@ export default function App() {
       {page === 'login' && <Login onLogin={handleLogin} onGoToSignUp={() => setPage('signup')} />}
       {page === 'signup' && <SignUp onGoToLogin={() => setPage('login')} />}
       
+      {page === 'products' && user?.userType === 'Customer' && (
+        <ProductList activeTab="products" user={user} onLogout={handleLogout} onCartUpdate={loadCartCount} onGoToProducts={() => setPage('products')} onGoToCart={() => setPage('cart')} onGoToOrders={() => setPage('orders')} />
+      )}
+      {page === 'cart' && user?.userType === 'Customer' && (
+        <ShoppingCart activeTab="cart" user={user} onLogout={handleLogout} onCheckout={() => setPage('orders')} onCartUpdate={loadCartCount} onGoToProducts={() => setPage('products')} onGoToCart={() => setPage('cart')} onGoToOrders={() => setPage('orders')} />
+      )}
+      {page === 'orders' && user?.userType === 'Customer' && (
+        <MyOrders activeTab="orders" user={user} onLogout={handleLogout} onBackToProducts={() => setPage('products')} onGoToProducts={() => setPage('products')} onGoToCart={() => setPage('cart')} onGoToOrders={() => setPage('orders')} />
+      )}
+
       {/* Customer Pages */}
       {page === 'products' && user?.userType === 'Customer' && (
         <ProductList 

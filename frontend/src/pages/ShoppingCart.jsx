@@ -1,235 +1,287 @@
 import { useState, useEffect } from 'react';
-import { getCart, removeFromCart, updateCartItem, createOrder } from '../api';
+import dayImage from '../assets/day.png';
+import noonImage from '../assets/noon.png';
+import sunsetImage from '../assets/sunset.png';
+import nightImage from '../assets/night.png';
 
-export default function ShoppingCart({ user, onLogout, onCheckout, onCartUpdate }) {
-  const [cart, setCart] = useState([]);
-  const [totalItems, setTotalItems] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState({});
+//Accept activeTab prop for glowing navigation
+export default function ShoppingCart({ user, onLogout, onCheckout, onCartUpdate, onGoToProducts, onGoToCart, onGoToOrders, activeTab = 'cart' }) {
+  const [timeOfDay, setTimeOfDay] = useState('morning');
+  const [cartItems, setCartItems] = useState([]);
 
   useEffect(() => {
-    loadCart();
+    const updateTime = () => {
+      const hour = new Date().getHours();
+      if (hour >= 6 && hour < 12) setTimeOfDay('morning');
+      else if (hour >= 12 && hour < 16) setTimeOfDay('noon');
+      else if (hour >= 16 && hour < 18) setTimeOfDay('sunset');
+      else setTimeOfDay('night');
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 10000);
+    return () => clearInterval(interval);
   }, []);
 
-  const loadCart = async () => {
-    try {
-      const res = await getCart();
-      if (res.success) {
-        setCart(res.cart);
-        setTotalItems(res.totalItems);
-        setTotalPrice(res.totalPrice);
-        // Notify parent to update global cart count
-        onCartUpdate?.(res.totalItems);
-      }
-    } catch (err) { console.error('Load cart error:', err); }
-    setLoading(false);
-  };
-
-  const handleQuantityChange = async (cartItemId, currentQty, change) => {
-    const newQty = currentQty + change;
-    if (newQty < 1) return; // Use remove button for deletion
-    
-    if (updating[cartItemId]) return;
-    setUpdating(prev => ({ ...prev, [cartItemId]: true }));
-
-    try {
-      const res = await updateCartItem({ cartItemId, quantity: newQty });
-      if (res.success) {
-        // Optimistic update
-        setCart(prev => prev.map(item => 
-          item.cartItemId === cartItemId ? { ...item, quantity: newQty } : item
-        ));
-        loadCart(); // Refresh totals from server
-      }
-    } catch (err) {
-      alert('Failed to update quantity');
-    } finally {
-      setUpdating(prev => ({ ...prev, [cartItemId]: false }));
+  //Transparent Theme (Matches ProductList & Login)
+  const themes = {
+    morning: {
+      bg: `url(${dayImage})`,
+      overlay: 'linear-gradient(135deg, rgba(27, 94, 32, 0.55) 0%, rgba(46, 125, 50, 0.4) 100%)',
+      accent: '#81C784', panelBg: '#F1F8E9', titleColor: '#1B5E20',
+      textPrimary: '#2E7D32', textSecondary: '#666666',
+      inputBg: '#FFFFFF', inputBorder: '#E0E0E0', inputFocus: '#4CAF50',
+      btnBg: '#2E7D32', btnHover: '#1B5E20', btnShadow: 'rgba(46, 125, 50, 0.3)',
+      linkColor: '#2E7D32', logoutColor: '#1b5e20',
+      navBtnBorder: 'rgba(255,255,255,0.3)', navBtnBg: 'rgba(255,255,255,0.15)', navBtnActive: 'rgba(255,255,255,0.35)'
+    },
+    noon: {
+      bg: `url(${noonImage})`,
+      overlay: 'linear-gradient(135deg, rgba(27, 94, 32, 0.5) 0%, rgba(76, 175, 80, 0.35) 100%)',
+      accent: '#66BB6A', panelBg: '#E8F5E9', titleColor: '#1B5E20',
+      textPrimary: '#2E7D32', textSecondary: '#666666',
+      inputBg: '#FFFFFF', inputBorder: '#E0E0E0', inputFocus: '#43A047',
+      btnBg: '#2E7D32', btnHover: '#1B5E20', btnShadow: 'rgba(46, 125, 50, 0.3)',
+      linkColor: '#2E7D32', logoutColor: '#2e7d32',
+      navBtnBorder: 'rgba(255,255,255,0.3)', navBtnBg: 'rgba(255,255,255,0.15)', navBtnActive: 'rgba(255,255,255,0.35)'
+    },
+    sunset: {
+      bg: `url(${sunsetImage})`,
+      overlay: 'linear-gradient(135deg, rgba(27, 94, 32, 0.65) 0%, rgba(85, 139, 47, 0.5) 50%, rgba(178, 223, 138, 0.25) 100%)',
+      accent: '#AED581', panelBg: '#F1F8E9', titleColor: '#1B5E20',
+      textPrimary: '#2E7D32', textSecondary: '#666666',
+      inputBg: '#FFFFFF', inputBorder: '#E0E0E0', inputFocus: '#4CAF50',
+      btnBg: '#2E7D32', btnHover: '#1B5E20', btnShadow: 'rgba(46, 125, 50, 0.3)',
+      linkColor: '#2E7D32', logoutColor: '#1b5e20',
+      navBtnBorder: 'rgba(255,255,255,0.3)', navBtnBg: 'rgba(255,255,255,0.15)', navBtnActive: 'rgba(255,255,255,0.35)'
+    },
+    night: {
+      bg: `url(${nightImage})`,
+      overlay: 'linear-gradient(135deg, rgba(13, 71, 161, 0.6) 0%, rgba(46, 125, 50, 0.5) 100%)',
+      accent: '#64B5F6', panelBg: '#E3F2FD', titleColor: '#1B5E20',
+      textPrimary: '#2E7D32', textSecondary: '#666666',
+      inputBg: '#FFFFFF', inputBorder: '#E0E0E0', inputFocus: '#4CAF50',
+      btnBg: '#2E7D32', btnHover: '#1B5E20', btnShadow: 'rgba(46, 125, 50, 0.3)',
+      linkColor: '#2E7D32', logoutColor: '#1565C0',
+      navBtnBorder: 'rgba(255,255,255,0.3)', navBtnBg: 'rgba(255,255,255,0.15)', navBtnActive: 'rgba(255,255,255,0.35)'
     }
   };
 
-  const handleRemove = async (cartItemId) => {
-    if (!window.confirm('Remove this item from cart?')) return;
-    
-    try {
-      const res = await removeFromCart({ cartItemId });
-      if (res.success) {
-        setCart(prev => prev.filter(item => item.cartItemId !== cartItemId));
-        loadCart(); // Refresh totals
-        onCartUpdate?.();
-      }
-    } catch (err) {
-      alert('Failed to remove item');
-    }
-  };
-
-  const handleCheckout = async () => {
-    if (cart.length === 0) return alert('Your cart is empty');
-    
-    // Create orders for each cart item (simplified for wireframe)
-    // In production: create single order with multiple items
-    let successCount = 0;
-    for (const item of cart) {
-      const res = await createOrder({
-        productId: item.product._id,
-        orderQuantity: item.quantity
-      });
-      if (res.success) successCount++;
-    }
-    
-    if (successCount === cart.length) {
-      alert('✅ Order placed successfully!\n\nPayment: Cash on Delivery\n\nYou will receive a confirmation shortly.');
-      // Clear cart by removing all items (optional: backend could handle this)
-      for (const item of cart) {
-        await removeFromCart({ cartItemId: item.cartItemId });
-      }
-      loadCart();
-      onCheckout?.();
-    } else {
-      alert('⚠️ Some items failed to process. Please try again.');
-    }
-  };
-
-  if (loading) return (
-    <div style={{ padding: 60, textAlign: 'center', color: '#666' }}>
-      <div style={{ fontSize: 32, marginBottom: 16 }}>🔄</div>
-      <p>Loading your cart from database...</p>
-    </div>
-  );
+  const theme = themes[timeOfDay];
+  const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 900, margin: '0 auto', padding: 20 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, paddingBottom: 16, borderBottom: '2px solid #eee' }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: 24 }}>🛒 Your Cart</h2>
-          <p style={{ margin: '4px 0 0', color: '#666', fontSize: 14 }}>
-            {totalItems} item{totalItems !== 1 ? 's' : ''} • Saved to your account
-          </p>
+    <div style={{ 
+      fontFamily: "'Inter', system-ui, sans-serif", 
+      background: `linear-gradient(135deg, ${theme.panelBg} 0%, #ffffff 100%)`,
+      minHeight: '100vh',
+      paddingBottom: 40
+    }}>
+      {/* NAVIGATION BAR */}
+      <div style={{ 
+        position: 'relative',
+        background: theme.bg,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        boxShadow: `0 4px 24px ${theme.btnShadow}`,
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        borderBottom: `3px solid ${theme.accent}`,
+        transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}>
+        <div style={{ position: 'absolute', inset: 0, background: theme.overlay, transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)' }}></div>
+        
+        <div style={{ position: 'relative', zIndex: 2, maxWidth: 1280, margin: '0 auto', padding: '20px 32px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {/* Logo */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div style={{ 
+                width: 54, height: 54, background: 'rgba(255,255,255,0.25)', borderRadius: 16,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32,
+                backdropFilter: 'blur(12px)', border: '2px solid rgba(255,255,255,0.4)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.2)'
+              }}>🌾</div>
+              <div>
+                <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-1px', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>AniWay</h1>
+                <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.95)', fontWeight: 500 }}>Farm to Table</p>
+              </div>
+            </div>
+
+            {/* Search Bar */}
+            <div style={{ flex: 1, maxWidth: 500, margin: '0 40px' }}>
+              <div style={{ 
+                display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.98)', 
+                borderRadius: 16, padding: '12px 20px', boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                border: '2px solid rgba(255,255,255,0.5)', transition: 'all 0.3s'
+              }}>
+                <span style={{ marginRight: 12, fontSize: 20 }}>🔍</span>
+                <input type="text" placeholder="Search orders..." style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none', fontSize: 14, color: '#333', fontWeight: 500 }} />
+              </div>
+            </div>
+
+            {/* Navigation Buttons with Glow Effect */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {['Products', 'Cart', 'Orders'].map((item) => {
+                const isCurrent = activeTab === item.toLowerCase();
+                return (
+                  <button 
+                    key={item}
+                    onClick={item === 'Products' ? onGoToProducts : item === 'Cart' ? onGoToCart : onGoToOrders}
+                    style={{ 
+                      padding: '10px 20px', 
+                      background: isCurrent ? 'rgba(255,255,255,0.2)' : theme.navBtnBg,
+                      color: '#FFFFFF',
+                      border: `2px solid ${isCurrent ? theme.accent : theme.navBtnBorder}`,
+                      borderRadius: 12,
+                      cursor: 'pointer',
+                      fontWeight: 700,
+                      fontSize: 13,
+                      backdropFilter: 'blur(8px)',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      position: 'relative',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                      boxShadow: isCurrent ? `0 0 15px ${theme.accent}, 0 0 30px ${theme.accent}40` : '0 4px 12px rgba(0,0,0,0.1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = isCurrent 
+                        ? `0 0 20px ${theme.accent}, 0 0 40px ${theme.accent}50` 
+                        : '0 6px 20px rgba(0,0,0,0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = isCurrent 
+                        ? `0 0 15px ${theme.accent}, 0 0 30px ${theme.accent}40` 
+                        : '0 4px 12px rgba(0,0,0,0.1)';
+                    }}
+                  >
+                    <span>{item}</span>
+                    {item === 'Cart' && (
+                      <span style={{
+                        position: 'absolute', top: -8, right: -8, background: 'linear-gradient(135deg, #ff5252 0%, #d32f2f 100%)',
+                        color: 'white', fontSize: 11, fontWeight: 800, minWidth: 22, height: 22, borderRadius: 11,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        border: '3px solid rgba(255,255,255,0.3)', boxShadow: '0 2px 8px rgba(211, 47, 47, 0.4)'
+                      }}>
+                        {cartItems.length > 99 ? '99+' : cartItems.length}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+
+              <div style={{ width: 2, height: 28, background: 'rgba(255,255,255,0.3)', margin: '0 4px', borderRadius: 1 }}></div>
+
+              {/* Logout */}
+              <button 
+                onClick={onLogout} 
+                style={{ 
+                  padding: '10px 20px', background: 'white', color: theme.logoutColor,
+                  border: 'none', borderRadius: 12, cursor: 'pointer', fontWeight: 800,
+                  fontSize: 13, boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', letterSpacing: '0.5px'
+                }}
+                onMouseOver={e => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = `0 6px 20px ${theme.logoutColor}40`; }}
+                onMouseOut={e => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)'; }}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
-        <button onClick={onLogout} style={{ padding: '8px 16px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer' }}>Logout</button>
       </div>
 
-      {cart.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 60, color: '#888' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>🧺</div>
-          <p style={{ fontSize: 16 }}>Your cart is empty</p>
-          <button onClick={() => onCheckout?.()} style={{ marginTop: 20, padding: '10px 24px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>
-            Continue Shopping →
-          </button>
+      {/* MAIN CONTENT */}
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '32px' }}>
+        <div style={{ marginBottom: 24, color: '#666', fontSize: 14 }}>
+          <span style={{ color: '#666', cursor: 'pointer', onClick: onGoToProducts }}>Home</span>
+          <span style={{ margin: '0 8px', color: '#999' }}>›</span>
+          <span style={{ color: theme.titleColor, fontWeight: 600 }}>Shopping Cart</span>
         </div>
-      ) : (
+
+        <h2 style={{ 
+          margin: '0 0 24px 0', fontSize: 32, fontWeight: 800, 
+          background: `linear-gradient(135deg, ${theme.titleColor} 0%, ${theme.textPrimary} 100%)`,
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', letterSpacing: '-1px'
+        }}>
+          My Cart
+        </h2>
+
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
           {/* Cart Items List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {cart.map(item => (
-              <div key={item.cartItemId} style={{ display: 'flex', gap: 16, padding: 16, border: '1px solid #e0e0e0', borderRadius: 8, background: '#fff' }}>
-                {/* Product Image Placeholder */}
-                <div style={{ 
-                  width: 80, height: 80, background: '#f0f0f0', borderRadius: 4, 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                  color: '#999', fontSize: 24, flexShrink: 0 
-                }}>
-                  {item.product.productType === 1 ? '🌾' : '🐔'}
-                </div>
-                
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <strong>{item.product.productName}</strong>
-                    <button 
-                      onClick={() => handleRemove(item.cartItemId)} 
-                      style={{ background: 'none', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: 18, padding: 0 }}
-                      title="Remove item"
-                    >✕</button>
-                  </div>
-                  <p style={{ margin: '4px 0', color: '#666', fontSize: 14, flex: 1 }}>
-                    {item.product.productDescription}
-                  </p>
-                  
-                  {/* Quantity Controls - Persisted */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #ddd', borderRadius: 4 }}>
-                      <button 
-                        onClick={() => handleQuantityChange(item.cartItemId, item.quantity, -1)}
-                        disabled={updating[item.cartItemId] || item.quantity <= 1}
-                        style={{ 
-                          padding: '4px 12px', background: '#f5f5f5', border: 'none', 
-                          cursor: 'pointer', fontSize: 16, fontWeight: 500 
-                        }}
-                      >−</button>
-                      <span style={{ padding: '4px 12px', minWidth: 30, textAlign: 'center', fontWeight: 500 }}>
-                        {updating[item.cartItemId] ? '...' : item.quantity}
-                      </span>
-                      <button 
-                        onClick={() => handleQuantityChange(item.cartItemId, item.quantity, 1)}
-                        disabled={updating[item.cartItemId]}
-                        style={{ 
-                          padding: '4px 12px', background: '#f5f5f5', border: 'none', 
-                          cursor: 'pointer', fontSize: 16, fontWeight: 500 
-                        }}
-                      >+</button>
-                    </div>
-                    <span style={{ color: '#888', fontSize: 14 }}>•</span>
-                    <span style={{ fontWeight: 600, fontSize: 16 }}>
-                      ₱{(item.product.price * item.quantity).toFixed(2)}
-                    </span>
-                  </div>
-                  
-                  <p style={{ margin: '8px 0 0', fontSize: 12, color: '#888' }}>
-                    💾 Saved to your account • Updates sync to database
-                  </p>
-                </div>
+          <div style={{ background: 'white', borderRadius: 20, padding: 24, boxShadow: `0 4px 20px ${theme.btnShadow}`, border: `1px solid ${theme.accent}15` }}>
+            {cartItems.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: 40, color: theme.textSecondary }}>
+                <div style={{ fontSize: 64, marginBottom: 16 }}>🛒</div>
+                <p>Your cart is empty.</p>
+                <button onClick={onGoToProducts} style={{ marginTop: 16, padding: '12px 24px', background: theme.btnBg, color: 'white', border: 'none', borderRadius: 12, cursor: 'pointer', fontWeight: 600 }}>Browse Products</button>
               </div>
-            ))}
+            ) : (
+              cartItems.map(item => (
+                <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 0', borderBottom: '1px solid #eee' }}>
+                  <div style={{ width: 60, height: 60, background: theme.panelBg, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>
+                    {item.image}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: theme.textPrimary }}>{item.name}</h3>
+                    <p style={{ margin: '4px 0 0', color: '#888', fontSize: 14 }}>₱{item.price.toFixed(2)} each</p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${theme.inputBorder}`, background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>-</button>
+                    <span style={{ fontWeight: 600, minWidth: 24, textAlign: 'center' }}>{item.quantity}</span>
+                    <button style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${theme.inputBorder}`, background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: theme.textPrimary, minWidth: 80, textAlign: 'right' }}>
+                    ₱{(item.price * item.quantity).toFixed(2)}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
-          {/* Order Summary Card */}
-          <div style={{ background: '#f9f9f9', padding: 20, borderRadius: 8, border: '1px solid #e0e0e0', height: 'fit-content', position: 'sticky', top: 20 }}>
-            <h3 style={{ margin: '0 0 16px', fontSize: 18 }}>Order Summary</h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ color: '#666' }}>Subtotal ({totalItems} items)</span>
-              <span>₱{totalPrice.toFixed(2)}</span>
+          {/* Order Summary */}
+          <div style={{ background: 'white', borderRadius: 20, padding: 24, boxShadow: `0 4px 20px ${theme.btnShadow}`, border: `1px solid ${theme.accent}15`, height: 'fit-content' }}>
+            <h3 style={{ margin: '0 0 20px', fontSize: 20, fontWeight: 700, color: theme.titleColor }}>Order Summary</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, color: '#666' }}>
+              <span>Subtotal</span>
+              <span>₱{total.toFixed(2)}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, paddingBottom: 16, borderBottom: '1px dashed #ddd' }}>
-              <span style={{ color: '#666' }}>Delivery Fee</span>
-              <span style={{ color: '#4CAF50', fontWeight: 500 }}>FREE</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, color: '#666' }}>
+              <span>Delivery Fee</span>
+              <span>₱40.00</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20, fontSize: 18, fontWeight: 600 }}>
+            <div style={{ height: 1, background: '#eee', margin: '16px 0' }}></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24, fontSize: 18, fontWeight: 800, color: theme.textPrimary }}>
               <span>Total</span>
-              <span>₱{totalPrice.toFixed(2)}</span>
+              <span>₱{(total + 40).toFixed(2)}</span>
             </div>
             <button 
-              onClick={handleCheckout} 
-              style={{ 
-                width: '100%', padding: '12px', background: '#4CAF50', color: 'white', 
-                border: 'none', borderRadius: 4, fontSize: 16, fontWeight: 500, cursor: 'pointer',
-                marginBottom: 12
+              onClick={onCheckout}
+              style={{
+                width: '100%', padding: '16px',
+                background: `linear-gradient(135deg, ${theme.btnBg} 0%, ${theme.btnHover} 100%)`,
+                color: 'white', border: 'none', borderRadius: 14,
+                cursor: 'pointer', fontSize: 16, fontWeight: 700,
+                boxShadow: `0 4px 16px ${theme.btnShadow}`,
+                transition: 'all 0.3s'
               }}
+              onMouseOver={e => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = `0 6px 20px ${theme.btnShadow}`; }}
+              onMouseOut={e => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = `0 4px 16px ${theme.btnShadow}`; }}
             >
-              ✓ Proceed to Checkout
+              Proceed to Checkout
             </button>
-            <button 
-              onClick={() => onCheckout?.()} 
-              style={{ 
-                width: '100%', padding: '10px', background: '#f5f5f5', color: '#333', 
-                border: '1px solid #ddd', borderRadius: 4, fontSize: 14, cursor: 'pointer' 
-              }}
-            >
-              ← Continue Shopping
-            </button>
-            <p style={{ margin: '16px 0 0', fontSize: 12, color: '#888', textAlign: 'center', lineHeight: 1.4 }}>
-              🔒 Cash on Delivery only<br/>
-              ⏱️ Orders confirmed within 24hrs<br/>
-              ❌ Cancel anytime before confirmation
-            </p>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Persistence Badge - Wireframe Annotation */}
-      <div style={{ marginTop: 32, padding: 12, background: '#e8f5e9', border: '1px dashed #4CAF50', borderRadius: 4, fontSize: 13, color: '#2e7d32' }}>
-        <strong>Bonus Implemented:</strong> Cart data persists in MongoDB. Items remain after page refresh, logout/login, and navigation. Quantity updates sync to database in real-time.
+      {/* Footer */}
+      <div style={{ 
+        maxWidth: 1000, margin: '40px auto 0', padding: '28px 32px',
+        background: `linear-gradient(135deg, ${theme.panelBg} 0%, ${theme.accent}20 100%)`,
+        borderRadius: 16, textAlign: 'center', border: `1px solid ${theme.accent}20`,
+        boxShadow: `0 2px 12px ${theme.btnShadow}`
+      }}>
+        <p style={{ margin: 0, color: theme.titleColor, fontSize: 14, fontWeight: 600 }}>🌾 All products sourced directly from local farmers</p>
       </div>
     </div>
   );
