@@ -4,6 +4,7 @@ import dayImage from '../assets/day.png';
 import noonImage from '../assets/noon.png';
 import sunsetImage from '../assets/sunset.png';
 import nightImage from '../assets/night.png';
+import logoImage from '../assets/aniway.png'
 
 export default function Login({ onLogin, onGoToSignUp }) {
   const [email, setEmail] = useState('');
@@ -27,6 +28,7 @@ export default function Login({ onLogin, onGoToSignUp }) {
     return () => clearInterval(interval);
   }, []);
 
+  //Themes depending on the time 
   const themes = {
     morning: {
       bg: `url(${dayImage})`,
@@ -212,21 +214,21 @@ export default function Login({ onLogin, onGoToSignUp }) {
           transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
         }}>
           
-          <div style={{
-            width: '64px',
-            height: '64px',
-            background: `linear-gradient(135deg, ${theme.btnBg} 0%, ${theme.btnHover} 100%)`,
+        {/* Logo Image */}
+        <img 
+          src={logoImage} 
+          alt="AniWay Logo" 
+          style={{
+            width: '100px',
+            height: '100px',
             margin: '0 auto 28px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: 'block',
             borderRadius: '18px',
-            fontSize: '32px',
             boxShadow: `0 8px 24px ${theme.btnShadow}`,
-            transition: 'all 0.3s ease'
-          }}>
-            🌾
-          </div>
+            transition: 'all 0.3s ease',
+            objectFit: 'cover'
+          }}
+        />
 
           <h2 style={{
             textAlign: 'center',

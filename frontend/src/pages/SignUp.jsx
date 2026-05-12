@@ -4,6 +4,7 @@ import dayImage from '../assets/day.png';
 import noonImage from '../assets/noon.png';
 import sunsetImage from '../assets/sunset.png';
 import nightImage from '../assets/night.png';
+import logoImage from '../assets/aniway.png';
 
 export default function SignUp({ onGoToLogin }) {
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
@@ -212,22 +213,23 @@ export default function SignUp({ onGoToLogin }) {
           transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
         }}>
           
-          <div style={{
+          {/* Logo Image */}
+          <img 
+            src={logoImage} 
+            alt="AniWay Logo" 
+            style={{
             width: '64px',
             height: '64px',
-            background: `linear-gradient(135deg, ${theme.btnBg} 0%, ${theme.btnHover} 100%)`,
             margin: '0 auto 28px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: 'block',
             borderRadius: '18px',
-            fontSize: '32px',
             boxShadow: `0 8px 24px ${theme.btnShadow}`,
-            transition: 'all 0.3s ease'
-          }}>
-            🌾
-          </div>
+            transition: 'all 0.3s ease',
+            objectFit: 'cover'
+            }}
+          />
 
+          // Create Account Header
           <h2 style={{
             textAlign: 'center',
             margin: '0 0 12px',

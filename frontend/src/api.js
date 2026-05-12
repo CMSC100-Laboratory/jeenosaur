@@ -19,7 +19,7 @@ const request = async (endpoint, method = 'GET', body = null) => {
   return response.json();
 };
 
-// Matches your controller.js routes exactly
+// Matches controller.js routes
 export const signUp = (data) => request('/sign-up', 'POST', data);
 export const login = (data) => request('/login', 'POST', data);
 export const getAllProducts = (sortBy = 'productName', order = 'asc') => 
@@ -35,7 +35,7 @@ export const addToCart = (data) => request('/add-to-cart', 'POST', data);
 export const getCart = () => request('/get-cart');
 export const removeFromCart = (data) => request('/remove-from-cart', 'POST', data);
 
-// Update cart item quantity (for persistence)
+// Update cart item quantity
 export const updateCartItem = (data) => request('/update-cart-item', 'POST', data);
 
 // Order APIs
@@ -54,5 +54,5 @@ export const getSalesReport = (period) => request(`/get-sales-report?period=${pe
 // Product Detail
 export const getProductById = (id) => request(`/get-product-by-id?id=${id}`);
 
-// User Profile (Bonus)
+// User Profile
 export const updateUserProfile = (data) => request('/update-profile', 'POST', data);

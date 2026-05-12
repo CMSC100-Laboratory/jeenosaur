@@ -4,8 +4,9 @@ import dayImage from '../assets/day.png';
 import noonImage from '../assets/noon.png';
 import sunsetImage from '../assets/sunset.png';
 import nightImage from '../assets/night.png';
+import logoImage from '../assets/site.png'
 
-// ✅ Accept activeTab prop
+//Accept activeTab prop
 export default function ProductList({ user, onLogout, onCartUpdate, onGoToProducts, onGoToCart, onGoToOrders, activeTab = 'products' }) {
   const [products, setProducts] = useState([]);
   const [sortBy, setSortBy] = useState('productName');
@@ -143,19 +144,44 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
         
         <div style={{ position: 'relative', zIndex: 2, maxWidth: 1280, margin: '0 auto', padding: '20px 32px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            {/* Logo */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ 
-                width: 54, height: 54, background: 'rgba(255,255,255,0.25)', borderRadius: 16,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32,
-                backdropFilter: 'blur(12px)', border: '2px solid rgba(255,255,255,0.4)',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.2)'
-              }}>🌾</div>
-              <div>
-                <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-1px', textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}>AniWay</h1>
-                <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.95)', fontWeight: 500 }}>Farm to Table</p>
-              </div>
-            </div>
+
+      {/* LEFT: Logo & Branding */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <img 
+          src={logoImage} 
+          alt="AniWay" 
+          style={{
+            width: '48px',
+            height: '48px',
+            objectFit: 'contain',
+            borderRadius: '10px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+          }}
+        />
+        <div>
+          <h1 style={{ 
+            margin: 0, 
+            fontSize: '26px', 
+            fontWeight: 800, 
+            color: '#fff', 
+            letterSpacing: '-0.5px', 
+            textShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            lineHeight: 1.1
+          }}>
+            AniWay
+          </h1>
+          <p style={{ 
+            margin: '2px 0 0 0', 
+            fontSize: '11px', 
+            color: 'rgba(255,255,255,0.85)', 
+            fontWeight: 600,
+            letterSpacing: '1.5px',
+            textTransform: 'uppercase'
+          }}>
+            Farm to Table
+          </p>
+        </div>
+      </div>
 
             {/* Search Bar */}
             <div style={{ flex: 1, maxWidth: 500, margin: '0 40px' }}>
