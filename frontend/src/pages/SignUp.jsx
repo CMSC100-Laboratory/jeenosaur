@@ -229,7 +229,6 @@ export default function SignUp({ onGoToLogin }) {
             }}
           />
 
-          // Create Account Header
           <h2 style={{
             textAlign: 'center',
             margin: '0 0 12px',
