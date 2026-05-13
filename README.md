@@ -1,3 +1,52 @@
+## Project Features
+
+### Customer Features
+- Customer account registration and login
+- Role-based customer navigation for products, cart, and orders
+- Product catalog showing available crops and poultry items
+- Product search by name or description
+- Product sorting by name, price, stock quantity, or category
+- Stock indicators for available, low-stock, and out-of-stock products
+- Add-to-cart functionality with persistent MongoDB cart storage
+- Cart page with item list, quantity display, subtotal, delivery fee, and total price
+- Customer order history page for viewing previous transactions and order statuses
+
+### Administrator Features
+- Default administrator account is automatically created on backend startup
+- Admin dashboard for managing products and users
+- Add, edit, and delete product listings
+- Product fields include name, description, type, quantity, and price
+- Product categorization for crops and poultry
+- View registered users and remove non-admin customer accounts
+- Dashboard summary cards for total products, registered users, low-stock items, and inventory value
+- Order management page for reviewing pending, confirmed, cancelled, or all orders
+- Admin order confirmation that updates order status and deducts inventory stock
+- Admin order disapproval/cancellation for pending transactions
+- Sales report page with weekly, monthly, and annual reporting periods
+- Sales breakdown by product, category, quantity sold, revenue, and sales share
+
+### Backend/API Features
+- Node.js and Express backend server
+- MongoDB database connection using Mongoose
+- User, product, cart, and order data models
+- Public authentication routes for sign-up and login
+- Admin-protected routes for user management, product management, order fulfillment, and sales reports
+- Customer-protected routes for cart management and order history
+- Product API supports retrieving all products, retrieving one product by ID, sorting, adding, updating, and deleting
+- Cart API supports adding items, retrieving cart details, removing items, and updating item quantity
+- Order API supports creating orders, cancelling pending orders, confirming orders, disapproving orders, andgenerating sales reports
+- CORS headers configured for frontend-backend communication
+
+### User Interface Features
+- React frontend built with Vite
+- Separate interfaces for customers and administrators
+- Local session persistence using `localStorage`
+- Time-based visual themes for morning, noon, sunset, and night
+- Branded AniWay farm-to-table interface
+- Responsive product grid and dashboard-style admin pages
+
+---
+
 ## Usage Guidelines
 
 ### Administrator Workflow
