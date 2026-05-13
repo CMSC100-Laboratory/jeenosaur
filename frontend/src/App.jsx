@@ -7,6 +7,7 @@ import ShoppingCart from './pages/ShoppingCart';
 import MyOrders from './pages/MyOrders';
 import SalesReport from './pages/SalesReport';
 import AdminOrders from './pages/AdminOrders';
+import UserProfile from './pages/UserProfile';
 
 export default function App() {
   const getStoredUser = () => {
@@ -71,6 +72,7 @@ export default function App() {
         />
       )}
 
+      // Customer Cart
       {page === 'cart' && user?.userType === 'Customer' && (
         <ShoppingCart
           activeTab="cart"
@@ -84,6 +86,7 @@ export default function App() {
         />
       )}
 
+      // Customer Orders
       {page === 'orders' && user?.userType === 'Customer' && (
         <MyOrders
           activeTab="orders"
@@ -96,6 +99,7 @@ export default function App() {
         />
       )}
 
+      // Admin Dashboard
       {page === 'admin' && user?.userType === 'Admin' && (
         <AdminDashboard
           user={user}
@@ -105,6 +109,7 @@ export default function App() {
         />
       )}
 
+      // Admin Orders
       {page === 'admin-orders' && user?.userType === 'Admin' && (
         <AdminOrders
           user={user}
@@ -113,6 +118,7 @@ export default function App() {
         />
       )}
 
+      // Sales Report
       {page === 'reports' && user?.userType === 'Admin' && (
         <SalesReport
           user={user}
@@ -120,6 +126,19 @@ export default function App() {
           onBackToDashboard={() => setPage('admin')}
         />
       )}
+
+      // User profile
+      {page === 'profile' && user?.userType === 'Customer' && (
+        <UserProfile 
+          user={user} 
+          onLogout={handleLogout} 
+          onGoToProducts={() => setPage('products')}
+          onGoToCart={() => setPage('cart')}
+          onGoToOrders={() => setPage('orders')}
+          activeTab="profile"
+        />
+      )}
+
     </div>
   );
 }
