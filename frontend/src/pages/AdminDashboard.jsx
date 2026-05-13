@@ -13,7 +13,7 @@ export default function AdminDashboard({ onLogout, onGoToOrders, onGoToReports }
   const [activeTab, setActiveTab] = useState('products');
   const [timeOfDay, setTimeOfDay] = useState('morning');
 
-  // Time-based theme logic (same as other pages)
+  // Time-based theme logic
   useEffect(() => {
     const updateTime = () => {
       const hour = new Date().getHours();
@@ -126,12 +126,14 @@ export default function AdminDashboard({ onLogout, onGoToOrders, onGoToReports }
     } catch (err) { alert('Failed: ' + (err.message || 'Unknown')); }
   };
 
+  // Deleting user
   const handleDeleteUser = async (id) => {
     if (!window.confirm('Delete this user?')) return;
     await deleteUser(id);
     setUsers(users.filter(u => u._id !== id));
   };
 
+  // Deleting product
   const handleDeleteProduct = async (id) => {
     if (!window.confirm('Delete this product?')) return;
     await deleteProduct(id);
