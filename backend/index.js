@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-require('./routes')(app)
+require('./router')(app)
 
 app.listen(3001, (err) => {
   if (err) { console.log(err) }
