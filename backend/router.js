@@ -20,6 +20,7 @@ module.exports = (app) => {
   app.get('/find-all-users', userController.findAllUsers)
   app.get('/find-by-user-id/', userController.findByUserId)
   app.post('/delete-by-user-id', userController.deleteByUserId)
+  app.post('/update-profile', userController.updateProfile)
 
   // Product routes
   app.post('/add-product', productController.addProduct)
