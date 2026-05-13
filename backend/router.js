@@ -1,9 +1,13 @@
-const userController = require('./controllers/userController')
-const productController = require('./controllers/productController')
-const orderController = require('./controllers/orderController')
-const cartController = require('./controllers/cartController')
+const userController = require('../controllers/userController')
+const productController = require('../controllers/productController')
+const orderController = require('../controllers/orderController')
+const cartController = require('../controllers/cartController')
+const User = require('../models/User')
+
 
 module.exports = (app) => {
+
+  
 
   // Allow Cross Origin Resource Sharing
   app.use((req, res, next) => {
@@ -47,4 +51,51 @@ module.exports = (app) => {
 
   //Update cart item quantity
   app.post('/update-cart-item', cartController.updateCartItem);
+
+  //Update User Profile Route
+  app.post('/update-profile', async (req, res) => {
+    try {
+      const userId = req.headers['x-user-id'];
+      const { firstName, lastName, email, phone, address } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ 
+          success: false, 
+          message: 'User not authenticated' 
+        });
+      }
+
+      // Update user in database
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { 
+          firstName,
+          lastName,
+          email,
+          phone,
+          address
+        },
+        { new: true, runValidators: true }
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'User not found' 
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        message: 'Profile updated successfully',
+        user: updatedUser 
+      });
+    } catch (err) {
+      console.error('Update profile error:', err);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Server error: ' + err.message 
+      });
+    }
+  });
 }

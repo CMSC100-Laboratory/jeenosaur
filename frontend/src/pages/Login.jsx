@@ -75,6 +75,7 @@ export default function Login({ onLogin, onGoToSignUp }) {
     try {
       const res = await login({ email, password });
       if (res.success && res.user) {
+        localStorage.setItem('user', JSON.stringify(res.user));
         onLogin(res.user);
       } else {
         setError(res.message || 'Login failed');
