@@ -69,10 +69,11 @@ export default function App() {
           onGoToProducts={() => setPage('products')}
           onGoToCart={() => setPage('cart')}
           onGoToOrders={() => setPage('orders')}
+          onGoToProfile={() => setPage('profile')}
         />
       )}
 
-      // Customer Cart
+      {/* Customer Cart */}
       {page === 'cart' && user?.userType === 'Customer' && (
         <ShoppingCart
           activeTab="cart"
@@ -83,10 +84,11 @@ export default function App() {
           onGoToProducts={() => setPage('products')}
           onGoToCart={() => setPage('cart')}
           onGoToOrders={() => setPage('orders')}
+          onGoToProfile={() => setPage('profile')}
         />
       )}
 
-      // Customer Orders
+      {/* Customer Orders */}
       {page === 'orders' && user?.userType === 'Customer' && (
         <MyOrders
           activeTab="orders"
@@ -96,10 +98,11 @@ export default function App() {
           onGoToProducts={() => setPage('products')}
           onGoToCart={() => setPage('cart')}
           onGoToOrders={() => setPage('orders')}
+          onGoToProfile={() => setPage('profile')}
         />
       )}
 
-      // Admin Dashboard
+      {/* Admin Dashboard */}
       {page === 'admin' && user?.userType === 'Admin' && (
         <AdminDashboard
           user={user}
@@ -109,7 +112,7 @@ export default function App() {
         />
       )}
 
-      // Admin Orders
+      {/* Admin Orders */}
       {page === 'admin-orders' && user?.userType === 'Admin' && (
         <AdminOrders
           user={user}
@@ -118,7 +121,7 @@ export default function App() {
         />
       )}
 
-      // Sales Report
+      {/* Sales Report */}
       {page === 'reports' && user?.userType === 'Admin' && (
         <SalesReport
           user={user}
@@ -127,7 +130,7 @@ export default function App() {
         />
       )}
 
-      // User profile
+      {/* User profile */}
       {page === 'profile' && user?.userType === 'Customer' && (
         <UserProfile 
           user={user} 
@@ -135,6 +138,7 @@ export default function App() {
           onGoToProducts={() => setPage('products')}
           onGoToCart={() => setPage('cart')}
           onGoToOrders={() => setPage('orders')}
+          onGoToProfile={() => setPage('profile')}
           activeTab="profile"
         />
       )}

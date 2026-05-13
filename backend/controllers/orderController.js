@@ -238,5 +238,17 @@ exports.getMyOrders = async (req, res, next) => {
   }
 
   const orders = await Order.find({ email: requester.email }).sort({ dateOrdered: -1 });
-  res.send({ total: orders.length, orders });
+  const detailedOrders = [];
+
+  for (const order of orders) {
+    const product = await Product.findById(order.productId);
+    const orderObject = order.toObject();
+    detailedOrders.push({
+      ...orderObject,
+      product,
+      totalAmount: product ? product.price * order.orderQuantity : 0
+    });
+  }
+
+  res.send({ success: true, total: detailedOrders.length, orders: detailedOrders });
 };

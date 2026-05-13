@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getCart, removeFromCart, updateCartItem } from '../api'; //Import from api.js
+import { createOrder, getCart, removeFromCart } from '../api';
 import dayImage from '../assets/day.png';
 import noonImage from '../assets/noon.png';
 import sunsetImage from '../assets/sunset.png';
@@ -10,6 +10,20 @@ export default function ShoppingCart({ user, onLogout, onCheckout, onCartUpdate,
   const [timeOfDay, setTimeOfDay] = useState('morning');
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const fetchCart = async () => {
+    try {
+      const data = await getCart();
+      if (data.success) setCartItems(data.items || data.cart || []);
+    } catch (err) {
+      console.error("Failed to load cart", err);
+      setMessage('Unable to load cart.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const updateTime = () => {
@@ -21,27 +35,10 @@ export default function ShoppingCart({ user, onLogout, onCheckout, onCartUpdate,
     };
     updateTime();
     const interval = setInterval(updateTime, 10000);
-
-    //Fetch cart using api.js function
-    const fetchCart = async () => {
-      try {
-        const data = await getCart(); // Uses /get-cart + auto x-user-id header
-        if (data.success) {
-          // Adjust based on your backend response structure
-          setCartItems(data.items || data.cart || []);
-        }
-      } catch (err) {
-        console.error("Failed to load cart", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (user) fetchCart();
     return () => clearInterval(interval);
   }, [user]);
 
-  //Transparent Themes
   const themes = {
     morning: { bg: `url(${dayImage})`, overlay: 'linear-gradient(135deg, rgba(27, 94, 32, 0.55) 0%, rgba(46, 125, 50, 0.4) 100%)', accent: '#81C784', panelBg: '#F1F8E9', titleColor: '#1B5E20', textPrimary: '#2E7D32', btnBg: '#2E7D32', btnHover: '#1B5E20', btnShadow: 'rgba(46, 125, 50, 0.3)', logoutColor: '#1b5e20', navBtnBorder: 'rgba(255,255,255,0.3)', navBtnBg: 'rgba(255,255,255,0.15)' },
     noon: { bg: `url(${noonImage})`, overlay: 'linear-gradient(135deg, rgba(27, 94, 32, 0.5) 0%, rgba(76, 175, 80, 0.35) 100%)', accent: '#66BB6A', panelBg: '#E8F5E9', titleColor: '#1B5E20', textPrimary: '#2E7D32', btnBg: '#2E7D32', btnHover: '#1B5E20', btnShadow: 'rgba(46, 125, 50, 0.3)', logoutColor: '#2e7d32', navBtnBorder: 'rgba(255,255,255,0.3)', navBtnBg: 'rgba(255,255,255,0.15)' },
@@ -55,59 +52,49 @@ export default function ShoppingCart({ user, onLogout, onCheckout, onCartUpdate,
     return sum + (price * item.quantity);
   }, 0);
 
-  const handleRemove = async (productId) => {
-    const res = await removeFromCart({ productId });
+  const handleRemove = async (cartItemId) => {
+    const res = await removeFromCart({ cartItemId });
     if (res.success) {
       onCartUpdate?.();
-      fetchCart(); // Refresh list
+      fetchCart();
+    } else {
+      setMessage(res.message || 'Unable to remove item.');
+    }
+  };
+
+  const handleCheckout = async () => {
+    if (checkingOut || cartItems.length === 0) return;
+    if (!window.confirm('Place this cash-on-delivery order?')) return;
+    setCheckingOut(true);
+    setMessage('');
+    try {
+      for (const item of cartItems) {
+        const res = await createOrder({ productId: item.product?._id || item.productId, orderQuantity: item.quantity });
+        if (!res.success) throw new Error(res.message || 'Unable to create order.');
+        await removeFromCart({ cartItemId: item.cartItemId || item._id });
+      }
+      setCartItems([]);
+      onCartUpdate?.();
+      onCheckout?.();
+    } catch (err) {
+      setMessage(err.message || 'Checkout failed.');
+    } finally {
+      setCheckingOut(false);
     }
   };
 
   return (
     <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: `linear-gradient(135deg, ${theme.panelBg} 0%, #ffffff 100%)`, minHeight: '100vh', paddingBottom: 40 }}>
-      {/* NAVIGATION BAR (same as ProductList) */}
       <div style={{ position: 'relative', background: theme.bg, backgroundSize: 'cover', backgroundPosition: 'center', boxShadow: `0 4px 24px ${theme.btnShadow}`, position: 'sticky', top: 0, zIndex: 100, borderBottom: `3px solid ${theme.accent}` }}>
         <div style={{ position: 'absolute', inset: 0, background: theme.overlay }}></div>
         <div style={{ position: 'relative', zIndex: 2, maxWidth: 1280, margin: '0 auto', padding: '20px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          
-          {/* LEFT: Logo & Branding */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <img 
-              src={logoImage} 
-              alt="AniWay" 
-              style={{
-                width: '48px',
-                height: '48px',
-                objectFit: 'contain',
-                borderRadius: '10px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-              }}
-            />
+            <img src={logoImage} alt="AniWay" style={{ width: '48px', height: '48px', objectFit: 'contain', borderRadius: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }} />
             <div>
-              <h1 style={{ 
-                margin: 0, 
-                fontSize: '26px', 
-                fontWeight: 800, 
-                color: '#fff', 
-                letterSpacing: '-0.5px', 
-                textShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                lineHeight: 1.1
-              }}>
-                AniWay
-              </h1>
-              <p style={{ 
-                margin: '2px 0 0 0', 
-                fontSize: '11px', 
-                color: 'rgba(255,255,255,0.85)', 
-                fontWeight: 600,
-                letterSpacing: '1.5px',
-                textTransform: 'uppercase'
-              }}>
-                Farm to Table
-              </p>
+              <h1 style={{ margin: 0, fontSize: '26px', fontWeight: 800, color: '#fff', letterSpacing: '-0.5px', textShadow: '0 2px 8px rgba(0,0,0,0.3)', lineHeight: 1.1 }}>AniWay</h1>
+              <p style={{ margin: '2px 0 0 0', fontSize: '11px', color: 'rgba(255,255,255,0.85)', fontWeight: 600, letterSpacing: '1.5px', textTransform: 'uppercase' }}>Farm to Table</p>
             </div>
           </div>
-          
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {['Products', 'Cart', 'Orders'].map((item) => {
               const isCurrent = activeTab === item.toLowerCase();
@@ -123,9 +110,9 @@ export default function ShoppingCart({ user, onLogout, onCheckout, onCartUpdate,
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '32px' }}>
         <h2 style={{ margin: '0 0 24px 0', fontSize: 32, fontWeight: 800, color: theme.titleColor }}>My Cart</h2>
+        {message && <div style={{ marginBottom: 16, padding: 12, background: 'white', borderRadius: 10, color: '#b91c1c' }}>{message}</div>}
         {loading ? <p>Loading your cart...</p> : cartItems.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 40, background: 'white', borderRadius: 20, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
             <div style={{ fontSize: 64, marginBottom: 16 }}>🛒</div>
@@ -136,16 +123,16 @@ export default function ShoppingCart({ user, onLogout, onCheckout, onCartUpdate,
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
             <div style={{ background: 'white', borderRadius: 20, padding: 24, boxShadow: `0 4px 20px ${theme.btnShadow}` }}>
               {cartItems.map(item => (
-                <div key={item._id || item.productId} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 0', borderBottom: '1px solid #eee' }}>
+                <div key={item.cartItemId || item._id || item.productId} style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '16px 0', borderBottom: '1px solid #eee' }}>
                   <div style={{ width: 60, height: 60, background: theme.panelBg, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>
-                    {item.product?.type === 1 ? '🌾' : '🐔'}
+                    {item.product?.productType === 1 ? '🌾' : '🐔'}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: theme.textPrimary }}>{item.product?.name || 'Product'}</h3>
+                    <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: theme.textPrimary }}>{item.product?.productName || item.product?.name || 'Product'}</h3>
                     <p style={{ margin: '4px 0 0', color: '#888', fontSize: 14 }}>₱{item.product?.price || item.price} each</p>
                   </div>
                   <div style={{ fontWeight: 600 }}>x{item.quantity}</div>
-                  <button onClick={() => handleRemove(item.product?._id || item.productId)} style={{ background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer' }}>🗑️</button>
+                  <button onClick={() => handleRemove(item.cartItemId || item._id)} style={{ background: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer' }}>🗑️</button>
                 </div>
               ))}
             </div>
@@ -155,7 +142,9 @@ export default function ShoppingCart({ user, onLogout, onCheckout, onCartUpdate,
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, color: '#666' }}><span>Delivery</span><span>₱40.00</span></div>
               <div style={{ height: 1, background: '#eee', margin: '16px 0' }}></div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24, fontSize: 18, fontWeight: 800, color: theme.textPrimary }}><span>Total</span><span>₱{(total + 40).toFixed(2)}</span></div>
-              <button onClick={onCheckout} style={{ width: '100%', padding: '16px', background: theme.btnBg, color: 'white', border: 'none', borderRadius: 14, cursor: 'pointer', fontWeight: 700 }}>Checkout</button>
+              <button onClick={handleCheckout} disabled={checkingOut} style={{ width: '100%', padding: '16px', background: theme.btnBg, color: 'white', border: 'none', borderRadius: 14, cursor: checkingOut ? 'wait' : 'pointer', fontWeight: 700 }}>
+                {checkingOut ? 'Checking out...' : 'Checkout'}
+              </button>
             </div>
           </div>
         )}
