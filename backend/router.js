@@ -1,8 +1,8 @@
-const userController = require('../controllers/userController')
-const productController = require('../controllers/productController')
-const orderController = require('../controllers/orderController')
-const cartController = require('../controllers/cartController')
-const User = require('../models/User')
+const userController = require('./controllers/userController')
+const productController = require('./controllers/productController')
+const orderController = require('./controllers/orderController')
+const cartController = require('./controllers/cartController')
+const User = require('./models/User')
 
 
 module.exports = (app) => {
