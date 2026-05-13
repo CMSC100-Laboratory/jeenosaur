@@ -1,3 +1,14 @@
+/*
+  Order controller for AniWay / FARM-TO-TABLE.
+
+  Handles customer orders, admin order management, and sales reports.
+
+  Order status values:
+    0 = Pending
+    1 = Confirmed / Completed
+    2 = Cancelled
+*/
+
 const User = require('../models/User')
 const Product = require('../models/Product')
 const Order = require('../models/Order')
@@ -5,7 +16,7 @@ const Order = require('../models/Order')
 const isAdmin = (type) => type === 'Admin';
 
 // GET /get-all-orders (Admin)
-// Returns all orders, optionally filtered by status (?status=0|1|2)
+// Returns all orders, optionally filtered by status (?status=0|1|2).
 exports.getAllOrders = async (req, res, next) => {
   const userId = req.headers['x-user-id'];
   if (!userId || userId === 'undefined') {
@@ -16,7 +27,7 @@ exports.getAllOrders = async (req, res, next) => {
   if (!requester || !isAdmin(requester.userType)) {
     return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
   }
-  
+
   const filter = {};
   if (req.query.status != null) { filter.orderStatus = req.query.status; }
 
@@ -25,7 +36,7 @@ exports.getAllOrders = async (req, res, next) => {
 };
 
 // POST /confirm-order (Admin)
-// Sets order status to 1 (Completed) and decrements product quantity
+// Confirms a pending order, then deducts the ordered quantity from inventory.
 exports.confirmOrder = async (req, res, next) => {
   const userId = req.headers['x-user-id'];
   if (!userId || userId === 'undefined') {
@@ -58,7 +69,7 @@ exports.confirmOrder = async (req, res, next) => {
 };
 
 // POST /disapprove-order (Admin)
-// Sets order status to 2 (Cancelled) without changing inventory
+// Cancels a pending order without changing inventory.
 exports.disapproveOrder = async (req, res, next) => {
   const userId = req.headers['x-user-id'];
   if (!userId || userId === 'undefined') {
@@ -83,7 +94,8 @@ exports.disapproveOrder = async (req, res, next) => {
 };
 
 // GET /get-sales-report (Admin)
-// Query params: period = 'weekly' | 'monthly' | 'annual'
+// Generates sales totals from confirmed orders only.
+// period can be weekly, monthly, or annual.
 exports.getSalesReport = async (req, res, next) => {
   const userId = req.headers['x-user-id'];
   if (!userId || userId === 'undefined') {
@@ -106,7 +118,6 @@ exports.getSalesReport = async (req, res, next) => {
     startDate = new Date(now);
     startDate.setMonth(now.getMonth() - 1);
   } else {
-    // annual
     startDate = new Date(now);
     startDate.setFullYear(now.getFullYear() - 1);
   }
@@ -116,7 +127,6 @@ exports.getSalesReport = async (req, res, next) => {
     dateOrdered: { $gte: startDate }
   });
 
-  // Group by productId and compute per-product totals
   const reportMap = {};
   for (const order of completedOrders) {
     const product = await Product.findById(order.productId);
@@ -145,7 +155,7 @@ exports.getSalesReport = async (req, res, next) => {
 };
 
 // POST /create-order (Customer)
-// FIXED: Changed second 'req' to 'res'
+// Creates a pending order for the logged-in customer.
 exports.createOrder = async (req, res, next) => {
   const userId = req.headers['x-user-id'];
   if (!userId || userId === 'undefined') {
@@ -161,17 +171,16 @@ exports.createOrder = async (req, res, next) => {
     return res.send({ success: false, message: 'Missing product ID or quantity' });
   }
 
-  //generate random transaction id
   const transactionId = 'TRX-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
 
   const now = new Date();
-  const timeString = now.toLocaleTimeString(); //format to readable time string
+  const timeString = now.toLocaleTimeString();
 
   const newOrder = new Order({
     transactionId: transactionId,
     productId: req.body.productId,
     orderQuantity: req.body.orderQuantity,
-    orderStatus: 0, //pending
+    orderStatus: 0,
     email: requester.email,
     dateOrdered: now,
     time: timeString
@@ -182,6 +191,7 @@ exports.createOrder = async (req, res, next) => {
 };
 
 // POST /cancel-order (Customer)
+// Cancels the logged-in customer's own pending order.
 exports.cancelOrder = async (req, res, next) => {
   const userId = req.headers['x-user-id'];
   if (!userId || userId === 'undefined') {
@@ -193,29 +203,29 @@ exports.cancelOrder = async (req, res, next) => {
     return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
   }
 
-  if (!req.body.transactionId) { 
-    return res.send({ success: false, message: 'No transaction ID provided' }); 
+  if (!req.body.transactionId) {
+    return res.send({ success: false, message: 'No transaction ID provided' });
   }
 
-  //find the order and verify it belongs to the logged-in customer
-  const order = await Order.findOne({ 
-    transactionId: req.body.transactionId, 
-    email: requester.email 
+  const order = await Order.findOne({
+    transactionId: req.body.transactionId,
+    email: requester.email
   });
-  
+
   if (!order) { return res.send({ success: false, message: 'Order not found' }); }
 
-  if (order.orderStatus !== 0) { 
-    return res.send({ success: false, message: 'Only pending orders can be canceled' }); 
+  if (order.orderStatus !== 0) {
+    return res.send({ success: false, message: 'Only pending orders can be canceled' });
   }
 
-  order.orderStatus = 2; // 2 = Canceled
+  order.orderStatus = 2;
   await order.save();
-  
+
   res.send({ success: true, message: 'Order canceled successfully' });
 };
 
 // GET /get-my-orders (Customer)
+// Returns all orders belonging to the logged-in customer, newest first.
 exports.getMyOrders = async (req, res, next) => {
   const userId = req.headers['x-user-id'];
   if (!userId || userId === 'undefined') {
