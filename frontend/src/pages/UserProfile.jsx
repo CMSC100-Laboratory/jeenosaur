@@ -125,13 +125,21 @@ export default function UserProfile({ user, onLogout, onGoToProducts, onGoToCart
       <div style={{ position: 'relative', zIndex: 2, maxWidth: 1280, margin: '0 auto', padding: '24px 32px' }}>
         
         {/* Header */}
-        <div style={{ marginBottom: 32 }}>
-          <h1 style={{ margin: 0, fontSize: 32, fontWeight: 800, color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
-            Hello, {user?.firstName}! 👋
-          </h1>
-          <p style={{ margin: '8px 0 0 0', fontSize: 15, color: 'rgba(255,255,255,0.9)' }}>
-            Manage your profile and view your order history
-          </p>
+        <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 32, fontWeight: 800, color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+              Hello, {user?.firstName || user?.email}!
+            </h1>
+            <p style={{ margin: '8px 0 0 0', fontSize: 15, color: 'rgba(255,255,255,0.9)' }}>
+              Manage your profile and view your order history
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button onClick={onGoToProducts} style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.18)', color: '#fff', border: '1px solid rgba(255,255,255,0.35)', borderRadius: 10, cursor: 'pointer', fontWeight: 700 }}>Products</button>
+            <button onClick={onGoToCart} style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.18)', color: '#fff', border: '1px solid rgba(255,255,255,0.35)', borderRadius: 10, cursor: 'pointer', fontWeight: 700 }}>Cart</button>
+            <button onClick={onGoToOrders} style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.18)', color: '#fff', border: '1px solid rgba(255,255,255,0.35)', borderRadius: 10, cursor: 'pointer', fontWeight: 700 }}>Orders</button>
+            <button onClick={onLogout} style={{ padding: '10px 16px', background: '#fff', color: theme.titleColor, border: 'none', borderRadius: 10, cursor: 'pointer', fontWeight: 800 }}>Logout</button>
+          </div>
         </div>
 
         {/* Stats Cards */}

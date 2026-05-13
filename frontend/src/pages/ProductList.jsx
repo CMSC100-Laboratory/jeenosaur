@@ -7,7 +7,7 @@ import nightImage from '../assets/night.png';
 import logoImage from '../assets/site.png'
 
 //Accept activeTab prop
-export default function ProductList({ user, onLogout, onCartUpdate, onGoToProducts, onGoToCart, onGoToOrders, activeTab = 'products' }) {
+export default function ProductList({ user, onLogout, onCartUpdate, onGoToProducts, onGoToCart, onGoToOrders, onGoToProfile, activeTab = 'products' }) {
   const [products, setProducts] = useState([]);
   const [sortBy, setSortBy] = useState('productName');
   const [order, setOrder] = useState('asc');
@@ -203,12 +203,12 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
 
             {/* Navigation Buttons with Glow Effect */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {['Products', 'Cart', 'Orders'].map((item) => {
+              {['Products', 'Cart', 'Orders', 'Profile'].map((item) => {
                 const isCurrent = activeTab === item.toLowerCase();
                 return (
                   <button 
                     key={item}
-                    onClick={item === 'Products' ? onGoToProducts : item === 'Cart' ? onGoToCart : onGoToOrders}
+                    onClick={item === 'Products' ? onGoToProducts : item === 'Cart' ? onGoToCart : item === 'Orders' ? onGoToOrders : onGoToProfile}
                     style={{ 
                       padding: '10px 20px', 
                       background: isCurrent ? 'rgba(255,255,255,0.2)' : theme.navBtnBg,
@@ -468,17 +468,6 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
             )}
           </div>
         )}
-      </div>
-
-      {/* Footer */}
-      <div style={{ 
-        maxWidth: 1280, margin: '40px auto 0', padding: '28px 32px',
-        background: `linear-gradient(135deg, ${theme.panelBg} 0%, ${theme.accent}20 100%)`,
-        borderRadius: 16, textAlign: 'center', border: `1px solid ${theme.accent}20`,
-        boxShadow: `0 2px 12px ${theme.btnShadow}`
-      }}>
-        <p style={{ margin: 0, color: theme.titleColor, fontSize: 14, fontWeight: 600 }}>🌾 All products sourced directly from local farmers</p>
-        <p style={{ margin: '8px 0 0 0', color: theme.textSecondary, fontSize: 13 }}>Cart data persists in MongoDB • Items remain after page refresh</p>
       </div>
     </div>
   );
