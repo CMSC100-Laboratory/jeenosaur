@@ -5,7 +5,7 @@ import noonImage from '../assets/noon.png';
 import sunsetImage from '../assets/sunset.png';
 import nightImage from '../assets/night.png';
 
-export default function AdminDashboard({ user, onLogout }) {
+export default function AdminDashboard({ onLogout, onGoToOrders, onGoToReports }) {
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({ id: '', productName: '', productDescription: '', productType: 1, productQuantity: 1, price: 0 });
@@ -87,11 +87,38 @@ export default function AdminDashboard({ user, onLogout }) {
   const lowStockCount = products.filter(p => p.productQuantity <= 5).length;
   const totalRevenue = products.reduce((sum, p) => sum + (p.price * p.productQuantity), 0);
 
+  const inputStyle = {
+    padding: '12px 16px',
+    border: `2px solid ${theme.inputBorder}`,
+    borderRadius: 10,
+    fontSize: 14,
+    outline: 'none',
+    background: theme.inputBg,
+    transition: 'all 0.3s',
+    color: '#333'
+  };
+
+  const renderField = ({ label, hint, fullWidth = false, children }) => (
+    <label style={{ gridColumn: fullWidth ? '1 / -1' : 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span style={{ fontSize: 13, fontWeight: 700, color: theme.titleColor }}>{label}</span>
+      {children}
+      <span style={{ fontSize: 12, color: theme.textSecondary, lineHeight: 1.4 }}>{hint}</span>
+    </label>
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (isEditing) await updateProduct(form);
-      else { const { id, ...data } = form; await addProduct(data); }
+      else {
+        await addProduct({
+          productName: form.productName,
+          productDescription: form.productDescription,
+          productType: form.productType,
+          productQuantity: form.productQuantity,
+          price: form.price
+        });
+      }
       setForm({ id: '', productName: '', productDescription: '', productType: 1, productQuantity: 1, price: 0 });
       setIsEditing(false);
       const updated = await getAllProducts();
@@ -111,7 +138,7 @@ export default function AdminDashboard({ user, onLogout }) {
     setProducts(products.filter(p => p._id !== id));
   };
 
-  const StatCard = ({ icon, label, value, color }) => (
+  const renderStatCard = ({ icon, label, value, color }) => (
     <div style={{
       background: theme.cardBg,
       borderRadius: 16,
@@ -198,6 +225,36 @@ export default function AdminDashboard({ user, onLogout }) {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <button
+              onClick={onGoToOrders}
+              style={{
+                padding: '10px 20px',
+                background: 'rgba(255,255,255,0.18)',
+                color: '#fff',
+                border: '1px solid rgba(255,255,255,0.35)',
+                borderRadius: 10,
+                cursor: 'pointer',
+                fontWeight: 700,
+                fontSize: 14
+              }}
+            >
+              Confirm Orders
+            </button>
+            <button
+              onClick={onGoToReports}
+              style={{
+                padding: '10px 20px',
+                background: 'rgba(255,255,255,0.18)',
+                color: '#fff',
+                border: '1px solid rgba(255,255,255,0.35)',
+                borderRadius: 10,
+                cursor: 'pointer',
+                fontWeight: 700,
+                fontSize: 14
+              }}
+            >
+              Sales Report
+            </button>
+            <button
               onClick={onLogout}
               style={{
                 padding: '10px 20px',
@@ -221,10 +278,10 @@ export default function AdminDashboard({ user, onLogout }) {
 
         {/* Stats Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 32 }}>
-          <StatCard icon="📦" label="Total Products" value={products.length} color={theme.accent} />
-          <StatCard icon="👥" label="Registered Users" value={users.length} color={theme.accent} />
-          <StatCard icon="⚠️" label="Low Stock Items" value={lowStockCount} color="#FF9800" />
-          <StatCard icon="💰" label="Inventory Value" value={`₱${totalRevenue.toLocaleString()}`} color={theme.accent} />
+          {renderStatCard({ icon: '📦', label: 'Total Products', value: products.length, color: theme.accent })}
+          {renderStatCard({ icon: '👥', label: 'Registered Users', value: users.length, color: theme.accent })}
+          {renderStatCard({ icon: '⚠️', label: 'Low Stock Items', value: lowStockCount, color: '#FF9800' })}
+          {renderStatCard({ icon: '💰', label: 'Inventory Value', value: `₱${totalRevenue.toLocaleString()}`, color: theme.accent })}
         </div>
 
         {/* Main Content Grid */}
@@ -270,48 +327,61 @@ export default function AdminDashboard({ user, onLogout }) {
               borderRadius: 14,
               border: `1px solid ${theme.cardBorder}`
             }}>
-              <input
-                placeholder="Product Name"
-                value={form.productName}
-                onChange={e => setForm({...form, productName: e.target.value})}
-                required
-                style={{ gridColumn: '1 / -1', padding: '12px 16px', border: `2px solid ${theme.inputBorder}`, borderRadius: 10, fontSize: 14, outline: 'none', background: theme.inputBg, transition: 'all 0.3s', color: '#333' }}
-                onFocus={e => { e.target.style.borderColor = theme.inputFocus; e.target.style.boxShadow = `0 0 0 3px ${theme.inputFocus}20`; }}
-                onBlur={e => { e.target.style.borderColor = theme.inputBorder; e.target.style.boxShadow = 'none'; }}
-              />
-              <input
-                placeholder="Description"
-                value={form.productDescription}
-                onChange={e => setForm({...form, productDescription: e.target.value})}
-                required
-                style={{ gridColumn: '1 / -1', padding: '12px 16px', border: `2px solid ${theme.inputBorder}`, borderRadius: 10, fontSize: 14, outline: 'none', background: theme.inputBg, transition: 'all 0.3s', color: '#333' }}
-                onFocus={e => { e.target.style.borderColor = theme.inputFocus; e.target.style.boxShadow = `0 0 0 3px ${theme.inputFocus}20`; }}
-                onBlur={e => { e.target.style.borderColor = theme.inputBorder; e.target.style.boxShadow = 'none'; }}
-              />
-              <select
-                value={form.productType}
-                onChange={e => setForm({...form, productType: Number(e.target.value)})}
-                style={{ padding: '12px 16px', border: `2px solid ${theme.inputBorder}`, borderRadius: 10, fontSize: 14, outline: 'none', background: theme.inputBg, color: '#333' }}
-              >
-                <option value={1}>Crop</option>
-                <option value={2}>Poultry</option>
-              </select>
-              <input
-                type="number"
-                placeholder="Quantity"
-                value={form.productQuantity}
-                onChange={e => setForm({...form, productQuantity: e.target.value})}
-                required
-                style={{ padding: '12px 16px', border: `2px solid ${theme.inputBorder}`, borderRadius: 10, fontSize: 14, outline: 'none', background: theme.inputBg, color: '#333' }}
-              />
-              <input
-                type="number"
-                placeholder="Price (₱)"
-                value={form.price}
-                onChange={e => setForm({...form, price: e.target.value})}
-                required
-                style={{ padding: '12px 16px', border: `2px solid ${theme.inputBorder}`, borderRadius: 10, fontSize: 14, outline: 'none', background: theme.inputBg, color: '#333' }}
-              />
+              {renderField({ label: 'Product name', fullWidth: true, children: (
+                <input
+                  placeholder="Example: Fresh tomatoes"
+                  value={form.productName}
+                  onChange={e => setForm({...form, productName: e.target.value})}
+                  required
+                  style={inputStyle}
+                  onFocus={e => { e.target.style.borderColor = theme.inputFocus; e.target.style.boxShadow = `0 0 0 3px ${theme.inputFocus}20`; }}
+                  onBlur={e => { e.target.style.borderColor = theme.inputBorder; e.target.style.boxShadow = 'none'; }}
+                />
+              ) })}
+              {renderField({ label: 'Description', fullWidth: true, children: (
+                <input
+                  placeholder="Example: Locally grown, packed per kilo"
+                  value={form.productDescription}
+                  onChange={e => setForm({...form, productDescription: e.target.value})}
+                  required
+                  style={inputStyle}
+                  onFocus={e => { e.target.style.borderColor = theme.inputFocus; e.target.style.boxShadow = `0 0 0 3px ${theme.inputFocus}20`; }}
+                  onBlur={e => { e.target.style.borderColor = theme.inputBorder; e.target.style.boxShadow = 'none'; }}
+                />
+              ) })}
+              {renderField({ label: 'Product type', children: (
+                <select
+                  value={form.productType}
+                  onChange={e => setForm({...form, productType: Number(e.target.value)})}
+                  style={inputStyle}
+                >
+                  <option value={1}>Crop</option>
+                  <option value={2}>Poultry</option>
+                </select>
+              ) })}
+              {renderField({ label: 'Quantity', children: (
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Example: 25"
+                  value={form.productQuantity}
+                  onChange={e => setForm({...form, productQuantity: e.target.value})}
+                  required
+                  style={inputStyle}
+                />
+              ) })}
+              {renderField({ label: 'Price', children: (
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Example: 120.00"
+                  value={form.price}
+                  onChange={e => setForm({...form, price: e.target.value})}
+                  required
+                  style={inputStyle}
+                />
+              ) })}
               <div style={{ gridColumn: '1 / -1', display: 'flex', gap: 12 }}>
                 <button
                   type="submit"
@@ -456,24 +526,6 @@ export default function AdminDashboard({ user, onLogout }) {
                   </div>
                 ))
               )}
-            </div>
-
-            {/* System Status (Unique Admin Element) */}
-            <div style={{
-              marginTop: 20,
-              padding: 16,
-              background: 'rgba(46, 125, 50, 0.08)',
-              borderRadius: 12,
-              border: `1px solid ${theme.cardBorder}`,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12
-            }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4CAF50', boxShadow: '0 0 8px #4CAF50' }}></div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: theme.titleColor }}>System Status</div>
-                <div style={{ fontSize: 12, color: theme.textSecondary }}>All services operational • Database synced</div>
-              </div>
             </div>
           </div>
         </div>

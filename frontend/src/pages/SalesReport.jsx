@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getSalesReport } from '../api';
 
-export default function SalesReport({ user, onLogout }) {
+export default function SalesReport({ onLogout, onBackToDashboard }) {
   const [report, setReport] = useState(null);
   const [period, setPeriod] = useState('annual');
   const [loading, setLoading] = useState(true);
@@ -9,6 +9,7 @@ export default function SalesReport({ user, onLogout }) {
   useEffect(() => { loadReport(); }, [period]);
 
   const loadReport = async () => {
+    setLoading(true);
     try {
       const res = await getSalesReport(period);
       if (res.success) setReport(res);
@@ -23,7 +24,10 @@ export default function SalesReport({ user, onLogout }) {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h2 style={{ margin: 0, fontSize: 24 }}>📈 Sales Report</h2>
-        <button onClick={onLogout} style={{ padding: '8px 16px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer' }}>Logout</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={onBackToDashboard} style={{ padding: '8px 16px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer' }}>Back to Dashboard</button>
+          <button onClick={onLogout} style={{ padding: '8px 16px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer' }}>Logout</button>
+        </div>
       </div>
 
       {/* Filters - Wireframe Controls */}
@@ -92,11 +96,6 @@ export default function SalesReport({ user, onLogout }) {
         <div style={{ fontSize: 48, marginBottom: 12 }}>📊</div>
         <p style={{ margin: 0 }}>Sales Trend Chart Placeholder</p>
         <p style={{ margin: '8px 0 0', fontSize: 13 }}>→ Integrate Chart.js or Recharts in hi-fi phase</p>
-      </div>
-
-      {/* Wireframe Annotation */}
-      <div style={{ marginTop: 24, padding: 12, background: '#e8f5e9', border: '1px dashed #4CAF50', borderRadius: 4, fontSize: 13, color: '#2e7d32' }}>
-        💡 <strong>Wireframe Note:</strong> Export buttons and interactive charts are stubs. Focus on data structure first.
       </div>
     </div>
   );
