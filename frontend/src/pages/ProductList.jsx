@@ -7,7 +7,7 @@ import nightImage from '../assets/night.png';
 import logoImage from '../assets/site.png'
 
 //Accept activeTab prop
-export default function ProductList({ user, onLogout, onCartUpdate, onGoToProducts, onGoToCart, onGoToOrders, activeTab = 'products' }) {
+export default function ProductList({ user, onLogout, onCartUpdate, onGoToProducts, onGoToCart, onGoToOrders, onGoToProfile, activeTab = 'products' }) {
   const [products, setProducts] = useState([]);
   const [sortBy, setSortBy] = useState('productName');
   const [order, setOrder] = useState('asc');
@@ -203,6 +203,7 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
 
             {/* Navigation Buttons with Glow Effect */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {/* Products, Cart, Orders Buttons */}
               {['Products', 'Cart', 'Orders'].map((item) => {
                 const isCurrent = activeTab === item.toLowerCase();
                 return (
@@ -253,7 +254,34 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
               })}
 
               {/* Divider */}
-              <div style={{ width: 2, height: 28, background: 'rgba(255,255,255,0.3)', margin: '0 4px', borderRadius: 1 }}></div>
+              <div style={{ width: 2, height: 28, background: 'rgba(255,255,255,0.3)', margin: '0 8px', borderRadius: 1 }}></div>
+
+              {/* Hello User + Profile Button */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              
+                <button
+                  onClick={onGoToProfile}
+                  style={{
+                    padding: '8px 14px', 
+                    background: 'rgba(255,255,255,0.2)', 
+                    color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.3)', 
+                    borderRadius: 8, 
+                    cursor: 'pointer',
+                    fontWeight: 600, 
+                    fontSize: 13, 
+                    backdropFilter: 'blur(8px)', 
+                    transition: 'all 0.3s'
+                  }}
+                  onMouseOver={e => e.target.style.background = 'rgba(255,255,255,0.3)'}
+                  onMouseOut={e => e.target.style.background = 'rgba(255,255,255,0.2)'}
+                >
+                  Profile
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div style={{ width: 2, height: 28, background: 'rgba(255,255,255,0.3)', margin: '0 8px 0 4px', borderRadius: 1 }}></div>
 
               {/* Logout */}
               <button 
@@ -264,7 +292,6 @@ export default function ProductList({ user, onLogout, onCartUpdate, onGoToProduc
                   fontSize: 13, boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', letterSpacing: '0.5px'
                 }}
-
                 onMouseOver={e => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = `0 6px 20px ${theme.logoutColor}40`; }}
                 onMouseOut={e => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)'; }}
               >

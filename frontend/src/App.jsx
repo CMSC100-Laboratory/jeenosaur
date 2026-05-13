@@ -69,6 +69,7 @@ export default function App() {
           onGoToProducts={() => setPage('products')}
           onGoToCart={() => setPage('cart')}
           onGoToOrders={() => setPage('orders')}
+          onGoToProfile={() => setPage('profile')}
         />
       )}
 

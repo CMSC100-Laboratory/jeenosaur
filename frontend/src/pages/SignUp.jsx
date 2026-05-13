@@ -75,9 +75,32 @@ export default function SignUp({ onGoToLogin }) {
     
     try {
       const res = await signUp({ firstName: form.firstName, lastName: form.lastName, email: form.email, password: form.password });
-      if (res.success) { setSuccess('Account created! Redirecting...'); setTimeout(onGoToLogin, 1500); }
-      else setError(res.message);
-    } catch { setError('Connection error'); }
+      
+      if (res.success) {
+        // Save user data to localStorage immediately
+        if (res.user) {
+          localStorage.setItem('user', JSON.stringify(res.user));
+        } else {
+          // Fallback: backend didn't return full user object, so build it from form
+          localStorage.setItem('user', JSON.stringify({
+            firstName: form.firstName,
+            lastName: form.lastName,
+            email: form.email,
+            userType: 'Customer'
+          }));
+        }
+        
+        // Sync with App.jsx state
+        window.dispatchEvent(new Event('userUpdated'));
+        
+        setSuccess('Account created! Redirecting...');
+        setTimeout(onGoToLogin, 1500);
+      } else {
+        setError(res.message);
+      }
+    } catch { 
+      setError('Connection error'); 
+    }
   };
 
   return (

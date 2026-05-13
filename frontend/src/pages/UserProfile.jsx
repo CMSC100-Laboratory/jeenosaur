@@ -127,7 +127,7 @@ export default function UserProfile({ user, onLogout, onGoToProducts, onGoToCart
         {/* Header */}
         <div style={{ marginBottom: 32 }}>
           <h1 style={{ margin: 0, fontSize: 32, fontWeight: 800, color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
-            Hello, {user?.firstName}! 👋
+            Hello, {user?.firstName}! 
           </h1>
           <p style={{ margin: '8px 0 0 0', fontSize: 15, color: 'rgba(255,255,255,0.9)' }}>
             Manage your profile and view your order history
