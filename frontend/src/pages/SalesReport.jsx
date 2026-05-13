@@ -23,7 +23,7 @@ export default function SalesReport({ onLogout, onBackToDashboard }) {
     <div style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 1100, margin: '0 auto', padding: 20 }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h2 style={{ margin: 0, fontSize: 24 }}>📈 Sales Report</h2>
+        <h2 style={{ margin: 0, fontSize: 24 }}>Sales Report</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={onBackToDashboard} style={{ padding: '8px 16px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer' }}>Back to Dashboard</button>
           <button onClick={onLogout} style={{ padding: '8px 16px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer' }}>Logout</button>
@@ -33,12 +33,12 @@ export default function SalesReport({ onLogout, onBackToDashboard }) {
       {/* Filters - Wireframe Controls */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <select value={period} onChange={(e) => setPeriod(e.target.value)} style={{ padding: '8px 12px', borderRadius: 4, border: '1px solid #ddd' }}>
-          <option value="weekly">🗓️ Weekly</option>
-          <option value="monthly">📅 Monthly</option>
-          <option value="annual">📆 Annual</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="annual">Annual</option>
         </select>
         <button onClick={loadReport} style={{ padding: '8px 20px', background: '#2196F3', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Refresh</button>
-        <button style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer' }}>📥 Export CSV</button>
+        <button style={{ padding: '8px 20px', background: '#f5f5f5', border: '1px solid #ddd', borderRadius: 4, cursor: 'pointer' }}>Export CSV</button>
       </div>
 
       {/* Summary Cards - Wireframe Grid */}
