@@ -31,6 +31,7 @@ module.exports = (app) => {
   // Order routes (Admin)
   app.get('/get-all-orders', orderController.getAllOrders)
   app.post('/confirm-order', orderController.confirmOrder)
+  app.post('/disapprove-order', orderController.disapproveOrder)
   app.get('/get-sales-report', orderController.getSalesReport)
 
   // Order routes (Customer)

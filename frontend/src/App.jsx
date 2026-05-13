@@ -1,45 +1,39 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import ProductList from './pages/ProductList';
 import AdminDashboard from './pages/AdminDashboard';
 import ShoppingCart from './pages/ShoppingCart';
 import MyOrders from './pages/MyOrders';
+import SalesReport from './pages/SalesReport';
+import AdminOrders from './pages/AdminOrders';
 
 export default function App() {
-  const [page, setPage] = useState('login');
-  const [user, setUser] = useState(null);
+  const getStoredUser = () => {
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  };
+
+  const [user, setUser] = useState(getStoredUser);
+  const [page, setPage] = useState(() => {
+    const storedUser = getStoredUser();
+    if (!storedUser) return 'login';
+    return storedUser.userType === 'Admin' ? 'admin' : 'products';
+  });
   const [cartCount, setCartCount] = useState(0);
 
-  // Load user and cart count on mount
-  useEffect(() => {
-    const stored = localStorage.getItem('user');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setUser(parsed);
-      setPage(parsed.userType === 'Admin' ? 'admin' : 'products');
-      // Load cart count for customers
-      if (parsed.userType === 'Customer') {
-        loadCartCount();
-      }
-    }
-  }, []);
-
-  // Load cart count from backend
-  const loadCartCount = async () => {
-    if (!user?.id) return;
+  const loadCartCount = async (currentUser = user) => {
+    if (!currentUser?.id) return;
 
     try {
       const res = await fetch('http://localhost:3001/get-cart', {
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': user.id
+          'x-user-id': currentUser.id
         }
       });
       const data = await res.json();
-      if (data.success) {
-        setCartCount(data.totalItems);
-      }
+      if (data.success) setCartCount(data.totalItems);
     } catch (err) {
       console.error('Failed to load cart:', err);
     }
@@ -49,9 +43,7 @@ export default function App() {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
     setPage(userData.userType === 'Admin' ? 'admin' : 'products');
-    if (userData.userType === 'Customer') {
-      loadCartCount();
-    }
+    if (userData.userType === 'Customer') loadCartCount(userData);
   };
 
   const handleLogout = () => {
@@ -61,131 +53,72 @@ export default function App() {
     setPage('login');
   };
 
-  // Navigation components with cart badge
-  const CustomerNav = () => (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-      <NavButton active={page === 'products'} onClick={() => setPage('products')}>🛍️ Products</NavButton>
-      <NavButton active={page === 'cart'} onClick={() => setPage('cart')} badge={cartCount}>
-        🛒 Cart
-      </NavButton>
-      <NavButton active={page === 'orders'} onClick={() => setPage('orders')}>📦 Orders</NavButton>
-    </div>
-  );
-
-  const AdminNav = () => (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-      <NavButton active={page === 'admin'} onClick={() => setPage('admin')} primary>📊 Dashboard</NavButton>
-      <NavButton active={page === 'admin-orders'} onClick={() => setPage('admin-orders')}>📋 Orders</NavButton>
-      <NavButton active={page === 'reports'} onClick={() => setPage('reports')}>📈 Reports</NavButton>
-    </div>
-  );
-
-  const NavButton = ({ children, active, onClick, badge, primary }) => (
-    <button 
-      onClick={onClick}
-      style={{
-        padding: '8px 16px',
-        background: active ? (primary ? '#2196F3' : '#4CAF50') : '#f5f5f5',
-        color: active ? 'white' : '#333',
-        border: 'none',
-        borderRadius: 4,
-        cursor: 'pointer',
-        fontWeight: active ? 600 : 400,
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 4
-      }}
-    >
-      {children}
-      {badge > 0 && (
-        <span style={{
-          position: 'absolute',
-          top: -6,
-          right: -6,
-          background: '#f44336',
-          color: 'white',
-          fontSize: 10,
-          fontWeight: 600,
-          minWidth: 18,
-          height: 18,
-          borderRadius: 9,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '0 4px'
-        }}>
-          {badge > 99 ? '99+' : badge}
-        </span>
-      )}
-    </button>
-  );
-
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', width: '100%', minHeight: '100vh', padding: user ? '20px' : '0' }}>
-      
-      {/* Page Router */}
+    <div style={{ fontFamily: 'system-ui, sans-serif', width: '100%', minHeight: '100vh' }}>
       {page === 'login' && <Login onLogin={handleLogin} onGoToSignUp={() => setPage('signup')} />}
       {page === 'signup' && <SignUp onGoToLogin={() => setPage('login')} />}
-      
+
       {page === 'products' && user?.userType === 'Customer' && (
-        <ProductList activeTab="products" user={user} onLogout={handleLogout} onCartUpdate={loadCartCount} onGoToProducts={() => setPage('products')} onGoToCart={() => setPage('cart')} onGoToOrders={() => setPage('orders')} />
-      )}
-      {page === 'cart' && user?.userType === 'Customer' && (
-        <ShoppingCart activeTab="cart" user={user} onLogout={handleLogout} onCheckout={() => setPage('orders')} onCartUpdate={loadCartCount} onGoToProducts={() => setPage('products')} onGoToCart={() => setPage('cart')} onGoToOrders={() => setPage('orders')} />
-      )}
-      {page === 'orders' && user?.userType === 'Customer' && (
-        <MyOrders activeTab="orders" user={user} onLogout={handleLogout} onBackToProducts={() => setPage('products')} onGoToProducts={() => setPage('products')} onGoToCart={() => setPage('cart')} onGoToOrders={() => setPage('orders')} />
+        <ProductList
+          activeTab="products"
+          user={user}
+          cartCount={cartCount}
+          onLogout={handleLogout}
+          onCartUpdate={() => loadCartCount(user)}
+          onGoToProducts={() => setPage('products')}
+          onGoToCart={() => setPage('cart')}
+          onGoToOrders={() => setPage('orders')}
+        />
       )}
 
-      {/* Customer Pages */}
-      {page === 'products' && user?.userType === 'Customer' && (
-        <ProductList 
-          user={user} 
-          onLogout={handleLogout} 
-          onCartUpdate={loadCartCount}
-          onGoToProducts={() => setPage('products')}
-          onGoToCart={() => setPage('cart')}
-          onGoToOrders={() => setPage('orders')}
-        />
-      )}
       {page === 'cart' && user?.userType === 'Customer' && (
-        <ShoppingCart 
-          user={user} 
-          onLogout={handleLogout} 
+        <ShoppingCart
+          activeTab="cart"
+          user={user}
+          onLogout={handleLogout}
           onCheckout={() => setPage('orders')}
-          onCartUpdate={loadCartCount}
+          onCartUpdate={() => loadCartCount(user)}
           onGoToProducts={() => setPage('products')}
           onGoToCart={() => setPage('cart')}
           onGoToOrders={() => setPage('orders')}
         />
       )}
+
       {page === 'orders' && user?.userType === 'Customer' && (
-        <MyOrders 
-          user={user} 
-          onLogout={handleLogout} 
+        <MyOrders
+          activeTab="orders"
+          user={user}
+          onLogout={handleLogout}
           onBackToProducts={() => setPage('products')}
           onGoToProducts={() => setPage('products')}
           onGoToCart={() => setPage('cart')}
           onGoToOrders={() => setPage('orders')}
         />
       )}
-      
-      {/* Admin Pages */}
-      {page === 'admin' && user?.userType === 'Admin' && <AdminDashboard user={user} onLogout={handleLogout} />}
-      {page === 'admin-orders' && user?.userType === 'Admin' && (
-        <div style={{ padding: 40, textAlign: 'center', background: '#f9f9f9', borderRadius: 8 }}>
-          <h3>📋 Order Management</h3>
-          <p style={{ color: '#666' }}>View & confirm customer orders</p>
-          <button onClick={() => setPage('admin')} style={{ marginTop: 16, padding: '10px 24px', background: '#2196F3', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>← Back to Dashboard</button>
-        </div>
+
+      {page === 'admin' && user?.userType === 'Admin' && (
+        <AdminDashboard
+          user={user}
+          onLogout={handleLogout}
+          onGoToOrders={() => setPage('admin-orders')}
+          onGoToReports={() => setPage('reports')}
+        />
       )}
+
+      {page === 'admin-orders' && user?.userType === 'Admin' && (
+        <AdminOrders
+          user={user}
+          onLogout={handleLogout}
+          onBackToDashboard={() => setPage('admin')}
+        />
+      )}
+
       {page === 'reports' && user?.userType === 'Admin' && (
-        <div style={{ padding: 40, textAlign: 'center', background: '#f9f9f9', borderRadius: 8 }}>
-          <h3>📈 Sales Reports</h3>
-          <p style={{ color: '#666' }}>Weekly/Monthly/Annual analytics</p>
-          <button onClick={() => setPage('admin')} style={{ marginTop: 16, padding: '10px 24px', background: '#2196F3', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>← Back to Dashboard</button>
-        </div>
+        <SalesReport
+          user={user}
+          onLogout={handleLogout}
+          onBackToDashboard={() => setPage('admin')}
+        />
       )}
     </div>
   );

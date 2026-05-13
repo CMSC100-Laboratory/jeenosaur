@@ -57,6 +57,31 @@ exports.confirmOrder = async (req, res, next) => {
   res.send({ success: true, message: 'Order confirmed and inventory updated' });
 };
 
+// POST /disapprove-order (Admin)
+// Sets order status to 2 (Cancelled) without changing inventory
+exports.disapproveOrder = async (req, res, next) => {
+  const userId = req.headers['x-user-id'];
+  if (!userId || userId === 'undefined') {
+    return res.status(401).send({ success: false, message: 'Unauthorized: Missing credentials' });
+  }
+
+  const requester = await User.findById(userId);
+  if (!requester || !isAdmin(requester.userType)) {
+    return res.status(401).send({ success: false, message: 'Unauthorized: User not found' });
+  }
+
+  if (!req.body.transactionId) { return res.send({ success: false, message: 'No transaction ID provided' }); }
+
+  const order = await Order.findOne({ transactionId: req.body.transactionId });
+  if (!order) { return res.send({ success: false, message: 'Order not found' }); }
+  if (order.orderStatus !== 0) { return res.send({ success: false, message: 'Only pending orders can be disapproved' }); }
+
+  order.orderStatus = 2;
+  await order.save();
+
+  res.send({ success: true, message: 'Order disapproved and cancelled' });
+};
+
 // GET /get-sales-report (Admin)
 // Query params: period = 'weekly' | 'monthly' | 'annual'
 exports.getSalesReport = async (req, res, next) => {
@@ -116,7 +141,7 @@ exports.getSalesReport = async (req, res, next) => {
   const report = Object.values(reportMap);
   const totalSales = report.reduce((sum, item) => sum + item.totalIncome, 0);
 
-  res.send({ period, startDate, report, totalSales });
+  res.send({ success: true, period, startDate, report, totalSales });
 };
 
 // POST /create-order (Customer)

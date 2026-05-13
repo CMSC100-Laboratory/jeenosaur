@@ -49,6 +49,7 @@ export const getAllOrders = (status) => {
   return request(url);
 };
 export const confirmOrder = (data) => request('/confirm-order', 'POST', data);
+export const disapproveOrder = (data) => request('/disapprove-order', 'POST', data);
 export const getSalesReport = (period) => request(`/get-sales-report?period=${period}`);
 
 // Product Detail
